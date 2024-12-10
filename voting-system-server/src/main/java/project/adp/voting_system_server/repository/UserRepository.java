@@ -12,6 +12,7 @@ import project.adp.voting_system_server.model.User;
 public interface UserRepository extends JpaRepository<User, String> {
 
     // Custom query to find users by the first digit of the PIN code
-    List<User> findByPinCodeFirstTwoDigit(@Param("firstTwoDigit") String firstTwoDigit);
     List<User> findByAadhaarNumber(@Param("aadhaarNumber") String aadhaarNumber);
+
+    List<User> findByState(String state);
 }

@@ -6,8 +6,8 @@ import java.util.List;
 
 @Entity
 @Table(indexes = {
-        @Index(name = "index_pinCodeFirstTwoDigit", columnList = "pinCodeFirstTwoDigit"),
-        @Index(name = "index_aadhaarNumber", columnList = "aadhaarNumber")
+        @Index(name = "index_aadhaarNumber", columnList = "aadhaarNumber"),
+        @Index(name = "index_state", columnList = "state")
 })
 public class User {
 
@@ -56,13 +56,12 @@ public class User {
     // @Column(nullable = false)
     // private String aadhaarStatus; // Active, Inactive, etc.
 
-    @Column(name = "elections_allowed", columnDefinition = "json")
+    @ElementCollection
+    @CollectionTable(name = "election_allowed_list", joinColumns = @JoinColumn(name = "election_id"))
+    @Column(name = "elections_allowed")
     private List<String> electionList;
 
     // private String uidaiAuthenticationCode; // UIDAI authentication code
-
-    @Column(name = "pinCodeFirstTwoDigit")
-    private String pinCodeFirstTwoDigit; // First digit of the PIN code (used for indexing)
 
     // Getters and Setters
 
@@ -136,17 +135,6 @@ public class User {
 
     public void setPinCode(String pinCode) {
         this.pinCode = pinCode;
-        if (pinCode != null && !pinCode.isEmpty()) {
-            this.pinCodeFirstTwoDigit = String.valueOf(pinCode.charAt(0)); // Extract the first digit
-        }
-    }
-
-    public String getPinCodeFirstTwoDigit() {
-        return pinCodeFirstTwoDigit;
-    }
-
-    public void setPinCodeFirstTwoDigit(String pinCodeFirstTwoDigit) {
-        this.pinCodeFirstTwoDigit = pinCodeFirstTwoDigit;
     }
 
     public String getCountry() {

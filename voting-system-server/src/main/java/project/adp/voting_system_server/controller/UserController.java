@@ -24,6 +24,4 @@ public class UserController {
     public User getUser(@PathVariable String aadhaarNumber) {
         return userService.getUserByAadhaarNumber(aadhaarNumber);
     }
-
-    // Other endpoints (e.g., delete user, update user, etc.)
 }
