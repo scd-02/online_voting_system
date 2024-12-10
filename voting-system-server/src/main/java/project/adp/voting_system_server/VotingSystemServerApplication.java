@@ -1,13 +1,13 @@
-package com.group01.voting_system;
+package project.adp.voting_system_server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class VotingSystemApplication {
+public class VotingSystemServerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(VotingSystemApplication.class, args);
+		SpringApplication.run(VotingSystemServerApplication.class, args);
 	}
 
 }

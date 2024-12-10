@@ -1,10 +1,10 @@
-package com.group01.voting_system;
+package project.adp.voting_system_server;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class VotingSystemApplicationTests {
+class VotingSystemServerApplicationTests {
 
 	@Test
 	void contextLoads() {
