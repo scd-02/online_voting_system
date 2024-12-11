@@ -6,8 +6,12 @@ import org.springframework.web.bind.annotation.*;
 import project.adp.voting_system_server.model.User;
 import project.adp.voting_system_server.service.UserService;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
+@CrossOrigin
 @RequestMapping("/users")
+@Slf4j
 public class UserController {
 
     @Autowired
@@ -22,6 +26,7 @@ public class UserController {
     // Endpoint to get user by Aadhaar number
     @GetMapping("/{aadhaarNumber}")
     public User getUser(@PathVariable String aadhaarNumber) {
+        log.info(aadhaarNumber);
         return userService.getUserByAadhaarNumber(aadhaarNumber);
     }
 }
