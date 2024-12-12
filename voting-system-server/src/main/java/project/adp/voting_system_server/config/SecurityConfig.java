@@ -20,18 +20,23 @@ public class SecurityConfig {
         http
                 // Configure authorization: require authentication but no role checks
                 .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/auth/**").permitAll()
                         // .requestMatchers("/users/**").authenticated() // Allow only authenticated users
                         // .requestMatchers("/admin/**").authenticated() // Allow only authenticated users
                         .anyRequest().permitAll()) // All other endpoints are publicly accessible
                 .formLogin(form -> form
                         .loginPage("http://localhost:3000/login") // External login page in Next.js
-                        .loginProcessingUrl("/perform_login") // Login processing URL in Spring Boot
+                        .loginProcessingUrl("/users/login") // Login processing URL in Spring Boot
                         .defaultSuccessUrl("/home", true) // Redirect to /home after successful login
                         .failureUrl("http://localhost:3000/login?error=true")) // Redirect on login failure
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("http://localhost:3000/login?logout=true")) // Redirect after logout
-                // Updated CSRF configuration
+                // .logout(logout -> logout
+                //         .logoutUrl("/logout")
+                //         .logoutSuccessUrl("http://localhost:3000/login?logout=true")) // Redirect after logout
+                // .sessionManagement(session -> session
+                //         .invalidSessionUrl("http://localhost:3000/session-expired") // Redirect after session expiration
+                //         .maximumSessions(1) // Limit to one session per user if needed
+                //         .expiredUrl("http://localhost:3000/session-expired") // Redirect to session expired page
+                        // Updated CSRF configuration
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity (enable in production if needed)
                 // Updated CORS configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())); // Set CORS configuration source
@@ -39,23 +44,23 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Password encoder for secure password hashing
-    }
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder(); // Password encoder for secure password hashing
+        }
 
-    // Global CORS configuration
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // Allow Next.js frontend
-        corsConfiguration.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(), HttpMethod.POST.name(),
-                HttpMethod.PUT.name(), HttpMethod.DELETE.name())); // Set allowed methods
-        corsConfiguration.setAllowedHeaders(Arrays.asList("*")); // Allow all headers
-        corsConfiguration.setAllowCredentials(true); // Allow credentials (cookies, authorization headers, etc.)
+        // Global CORS configuration
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration corsConfiguration = new CorsConfiguration();
+                corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // Allow Next.js frontend
+                corsConfiguration.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(), HttpMethod.POST.name(),
+                                HttpMethod.PUT.name(), HttpMethod.DELETE.name())); // Set allowed methods
+                corsConfiguration.setAllowedHeaders(Arrays.asList("*")); // Allow all headers
+                corsConfiguration.setAllowCredentials(true); // Allow credentials (cookies, authorization headers, etc.)
 
-        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfiguration); // Apply CORS to all paths
-        return source;
-    }
+                org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", corsConfiguration); // Apply CORS to all paths
+                return source;
+        }
 }

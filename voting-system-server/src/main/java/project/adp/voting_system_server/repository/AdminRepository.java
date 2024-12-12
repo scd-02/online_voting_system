@@ -6,5 +6,5 @@ import project.adp.voting_system_server.model.Admin;
 
 @Repository
 public interface AdminRepository extends JpaRepository<Admin, String> {
-    // JpaRepository provides basic CRUD methods.
+    Admin findByUserId(String userId); // Corrected method name
 }

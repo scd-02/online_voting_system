@@ -7,31 +7,30 @@ export default function Login() {
   const [aadhaar, setAadhaar] = useState("");
 
   const handleLogin = async (e) => {
-    e.preventDefault(); // Prevent default form submission
-    const API_URL = process.env.NEXT_PUBLIC_API_URL; // Environment variable for backend URL
+    e.preventDefault();
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-    const token = `admin:admin`;
-    const encodedToken = Buffer.from(token).toString('base64');
-    var config = {
-      method: 'get',
-      // url: API_URL + `/users/${aadhaar}`,
-      url: API_URL + `/users/123456789012`,
-      headers: { 'Authorization': 'Basic ' + encodedToken }
-    };
-    console.log("Config:", config);
-    console.log(API_URL);
-    axios(config)
-      .then(function (response) {
-        console.log(JSON.stringify(response.data));
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    try {
+      const response = await axios.get(`${API_URL}/auth/checkAadhaar/${aadhaar}`);
+      const data = response.data;
+
+      if (data.exists) {
+        // Redirect to the next page or perform other actions
+        console.log("User exists, ID:", data);
+        // alert("Login successful! Redirecting...");
+        // window.location.href = "/nextPage"; // Replace with your actual page
+      } else {
+        alert("User does not exist.");
+      }
+    } catch (error) {
+      console.error("Error checking Aadhaar:", error);
+      alert("Login failed. Please try again.");
+    }
   };
 
   return (
     <div className="flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-sm p-8 bg-white rounded shadow-md border border-e-gray-300">
+      <div className="w-full max-w-sm p-8 bg-white rounded shadow-md border border-gray-300">
         <h2 className="mb-6 text-2xl font-bold text-center">Login</h2>
         <form onSubmit={handleLogin}>
           <div className="mb-4">

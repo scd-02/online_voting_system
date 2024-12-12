@@ -7,7 +7,6 @@ import project.adp.voting_system_server.model.Admin;
 import project.adp.voting_system_server.service.AdminService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/admin")
@@ -24,9 +23,8 @@ public class AdminController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<Admin> getAdminById(@PathVariable String userId) {
-        Optional<Admin> admin = adminService.getAdminById(userId);
-        return admin.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Admin admin = adminService.getAdminById(userId); // Correct method
+        return admin != null ? ResponseEntity.ok(admin) : ResponseEntity.notFound().build();
     }
 
     @PostMapping

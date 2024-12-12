@@ -7,10 +7,10 @@ import jakarta.persistence.Table;
 @Entity
 @Table
 public class Admin {
-    
+
     @Id
     private String userId; // This will store the Aadhar Number as a String.
-    
+
     public String getUserId() {
         return userId;
     }

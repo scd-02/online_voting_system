@@ -18,8 +18,8 @@ public class AdminService {
         return adminRepository.findAll();
     }
 
-    public Optional<Admin> getAdminById(String userId) {
-        return adminRepository.findById(userId);
+    public Admin getAdminById(String userId) {
+        return adminRepository.findByUserId(userId); // Correct method name
     }
 
     public Admin createAdmin(Admin admin) {
