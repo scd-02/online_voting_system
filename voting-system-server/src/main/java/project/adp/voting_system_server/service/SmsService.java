@@ -5,7 +5,7 @@ import com.twilio.type.PhoneNumber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import project.adp.voting_system_server.config.TwilioConfig;
-import project.adp.voting_system_server.repository.UserRepository;
+import project.adp.voting_system_server.repository.PersonRepository;
 
 import java.util.Random;
 
@@ -16,25 +16,24 @@ public class SmsService {
     private TwilioConfig twilioConfig;
 
     @Autowired
-    private UserRepository userRepository; // Assuming UserRepository fetches user data including phone number
+    private PersonRepository personRepository; // Use PersonRepository instead of UserRepository
 
     @Autowired
     private OtpService otpService;
 
     // Send OTP and save in database
-    public String sendOtp(String aadharNumber) {
-        // Fetch the user's phone number based on the aadharNumber from UserRepository
-        String phoneNumber = userRepository.findByAadhaarNumber(aadharNumber).getMobileNumber();
-
-        if (phoneNumber == null) {
-            throw new RuntimeException("Phone number not found for the provided Aadhar number");
-        }
+    public String sendOtp(String aadhaarNumber) {
+        // Fetch the person's phone number based on the aadhaarNumber from
+        // PersonRepository
+        String phoneNumber = personRepository.findById(aadhaarNumber)
+                .map(person -> person.getMobileNumber()) // Get mobile number if present
+                .orElseThrow(() -> new RuntimeException("Phone number not found for the provided Aadhaar number"));
 
         // Generate OTP
         String otp = generateOtp();
 
         // Save OTP in the database (OtpService is responsible for this)
-        otpService.saveOtp(aadharNumber, otp);
+        otpService.saveOtp(aadhaarNumber, otp);
 
         // Send OTP via Twilio
         sendOtpViaTwilio(phoneNumber, otp);

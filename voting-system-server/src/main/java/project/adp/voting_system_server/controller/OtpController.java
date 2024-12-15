@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import project.adp.voting_system_server.service.OtpService;
 import project.adp.voting_system_server.service.SmsService;
+import project.adp.voting_system_server.repository.UserRepository;
 
 @RestController
 @RequestMapping("/otp")
@@ -14,6 +15,9 @@ public class OtpController {
 
     @Autowired
     private OtpService otpService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     // Endpoint to send OTP (fetch phone number from the UserService based on
     // aadharNumber)
@@ -30,11 +34,19 @@ public class OtpController {
 
     // Endpoint to validate OTP
     @GetMapping("/validate/{aadharNumber}/{otp}")
-    public boolean validateOtp(@PathVariable String aadharNumber, @PathVariable String otp) {
+    public String validateOtp(@PathVariable String aadharNumber, @PathVariable String otp) {
         try {
-            return otpService.validateOtp(aadharNumber, otp); // Validate OTP for the given aadharNumber
+            if(otpService.validateOtp(aadharNumber, otp)){
+                if(userRepository.findById(aadharNumber).isPresent()){
+                    return "exists";
+                }else{
+                    return "new";
+                }
+            } else{
+                return "wrong";
+            }
         } catch (Exception e) {
-            return false; // Return false if validation fails
+            return e.toString(); // Return false if validation fails
         }
     }
 }

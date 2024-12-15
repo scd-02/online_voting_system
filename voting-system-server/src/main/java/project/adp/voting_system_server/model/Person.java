@@ -2,24 +2,22 @@ package project.adp.voting_system_server.model;
 
 import jakarta.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Table(indexes = {
-        @Index(name = "index_aadhaarNumber", columnList = "aadhaarNumber"),
-        @Index(name = "index_state", columnList = "state")
+        @Index(name = "index_aadhaarNumber", columnList = "aadhaarNumber")
 })
-public class User {
+public class Person {
 
     @Id
     @Column(unique = true, nullable = false)
     private String aadhaarNumber; // Unique Aadhaar number (Primary key)
 
     @Column(nullable = false)
-    private String fullName; // Full name of the user
+    private String fullName; // Full name of the person
 
     @Column(nullable = false)
-    private String gender; // Gender of the user
+    private String gender; // Gender of the person
 
     @Temporal(TemporalType.DATE)
     private Date dateOfBirth; // Date of birth
@@ -33,7 +31,7 @@ public class User {
     private String city; // City/Town/Village
 
     @Column(nullable = false)
-    private String state; // State of the user
+    private String state; // State of the person
 
     @Column(nullable = false)
     private String pinCode; // PIN/Postal Code
@@ -52,16 +50,6 @@ public class User {
     private String motherName; // Mother's name (optional)
 
     private String residenceType; // Urban or Rural
-
-    // @Column(nullable = false)
-    // private String aadhaarStatus; // Active, Inactive, etc.
-
-    @ElementCollection
-    @CollectionTable(name = "election_allowed_list", joinColumns = @JoinColumn(name = "election_id"))
-    @Column(name = "elections_allowed")
-    private List<String> electionList;
-
-    // private String uidaiAuthenticationCode; // UIDAI authentication code
 
     // Getters and Setters
 
@@ -193,33 +181,9 @@ public class User {
         this.residenceType = residenceType;
     }
 
-    // public String getAadhaarStatus() {
-    // return aadhaarStatus;
-    // }
-
-    // public void setAadhaarStatus(String aadhaarStatus) {
-    // this.aadhaarStatus = aadhaarStatus;
-    // }
-
-    // public String getUidaiAuthenticationCode() {
-    // return uidaiAuthenticationCode;
-    // }
-
-    // public void setUidaiAuthenticationCode(String uidaiAuthenticationCode) {
-    // this.uidaiAuthenticationCode = uidaiAuthenticationCode;
-    // }
-
-    public List<String> getElectionList() {
-        return electionList;
-    }
-
-    public void setElectionList(List<String> electionList) {
-        this.electionList = electionList;
-    }
-
     @Override
     public String toString() {
-        return "User{" + "\n" +
+        return "Person{" + "\n" +
                 "  aadhaarNumber: '" + aadhaarNumber + '\'' + "\n" +
                 "  fullName: '" + fullName + '\'' + "\n" +
                 "  gender: '" + gender + '\'' + "\n" +
@@ -233,29 +197,6 @@ public class User {
                 "  fatherName: '" + fatherName + '\'' + "\n" +
                 "  motherName: '" + motherName + '\'' + "\n" +
                 "  residenceType: '" + residenceType + '\'' + "\n" +
-                "  electionList: " + electionList + "\n" +
                 '}';
-    }
-
-    public User(Person person) {
-        this.aadhaarNumber = person.getAadhaarNumber();
-        this.fullName = person.getFullName();
-        this.gender = person.getGender();
-        this.dateOfBirth = person.getDateOfBirth();
-        this.addressLine1 = person.getAddressLine1();
-        this.addressLine2 = person.getAddressLine2();
-        this.city = person.getCity();
-        this.state = person.getState();
-        this.pinCode = person.getPinCode();
-        this.country = person.getCountry();
-        this.photograph = person.getPhotograph();
-        this.mobileNumber = person.getMobileNumber();
-        this.emailAddress = person.getEmailAddress();
-        this.fatherName = person.getFatherName();
-        this.motherName = person.getMotherName();
-        this.residenceType = person.getResidenceType();
-    }
-
-    public User() {
     }
 }
