@@ -216,4 +216,25 @@ public class User {
     public void setElectionList(List<String> electionList) {
         this.electionList = electionList;
     }
+
+    @Override
+    public String toString() {
+        return "User{" + "\n" +
+                "  aadhaarNumber: '" + aadhaarNumber + '\'' + "\n" +
+                "  fullName: '" + fullName + '\'' + "\n" +
+                "  gender: '" + gender + '\'' + "\n" +
+                "  dateOfBirth: " + dateOfBirth + "\n" +
+                "  address: '" + addressLine1 +
+                (addressLine2 != null && !addressLine2.isEmpty() ? ", " + addressLine2 : "") +
+                ", " + city + ", " + state + ", " + pinCode + ", " + country + '\'' + "\n" +
+                "  photograph: '" + photograph + '\'' + "\n" +
+                "  mobileNumber: '" + mobileNumber + '\'' + "\n" +
+                "  emailAddress: '" + emailAddress + '\'' + "\n" +
+                "  fatherName: '" + fatherName + '\'' + "\n" +
+                "  motherName: '" + motherName + '\'' + "\n" +
+                "  residenceType: '" + residenceType + '\'' + "\n" +
+                "  electionList: " + electionList + "\n" +
+                '}';
+    }
+
 }
