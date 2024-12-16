@@ -1,25 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function OTPVerification() {
     const [otp, setOtp] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const [isAgree, setIsAgree] = useState(false);
+    // const [isAgree, setIsAgree] = useState(false);
+    const [aadhaar, setAadhaar] = useState("");
 
     // Fetch Aadhaar number from localStorage on component mount
     useEffect(() => {
         const storedAadhaar = localStorage.getItem("aadhaarNumber");
-        if (storedAadhaar) {
-            setAadhaar(storedAadhaar);
-        }
+        setAadhaar(storedAadhaar); // Read from localStorage after hydration
     }, []);
 
-    setTimeout(() => {
-        window.location.href = "/login"; // Redirect to the login page when timeout
-    }, 2 * 60 * 1000);
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            window.location.href = "/login"; // Redirect to login after 2 minutes
+        }, 2 * 60 * 1000);
+
+        return () => clearTimeout(timeout);
+    }, []);
 
     const handleOtpChange = (e) => {
         const value = e.target.value;
@@ -41,7 +44,6 @@ export default function OTPVerification() {
 
         try {
             setIsSubmitting(true);
-            console.log(`${API_URL}/otp/validate/${aadhaar}/${otp}`)
             const response = await axios.get(`${API_URL}/otp/validate/${aadhaar}/${otp}`);
             console.log(response)
 
