@@ -9,7 +9,7 @@ import project.adp.voting_system_server.service.VoteService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/votes")
+@RequestMapping("/votes")
 public class VoteController {
 
     private final VoteService voteService;

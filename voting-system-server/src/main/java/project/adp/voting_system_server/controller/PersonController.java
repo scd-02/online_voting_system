@@ -15,7 +15,7 @@ public class PersonController {
     private PersonService personService;
 
     // Create or Update a Person
-    @PostMapping
+    @PostMapping("/save")
     public Person createOrUpdatePerson(@RequestBody Person person) {
         return personService.savePerson(person);
     }

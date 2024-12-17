@@ -43,7 +43,7 @@ public class OtpController {
         }
     }
 
-    @GetMapping("/validate/{aadharNumber}/{otp}")
+    @PostMapping("/validate/{aadharNumber}/{otp}")
     public ResponseEntity<Map<String, String>> validateOtp(@PathVariable String aadharNumber, @PathVariable String otp,
             HttpServletRequest request) {
         try {
@@ -52,13 +52,12 @@ public class OtpController {
                 Map<String, String> response = new HashMap<>();
 
                 // Authenticate user and get the session ID
-                Map<String, String> authenticationResponse = authenticationService
-                        .authenticateAndReturnSession(aadharNumber, request);
-                String sessionId = authenticationResponse.get("sessionId");
-                String role = authenticationResponse.get("role"); // Extract the role
+                // Map<String, String> authenticationResponse =
 
-                response.put("sessionId", sessionId);
-                response.put("role", role);
+                authenticationService.authenticateAndReturnSession(aadharNumber, request);
+
+                // String sessionId = authenticationResponse.get("sessionId");
+                // response.put("sessionId", sessionId);
 
                 // Check if user exists in the repository
                 if (userRepository.findById(aadharNumber).isPresent()) {
@@ -75,7 +74,6 @@ public class OtpController {
             } else {
                 // Invalid OTP
                 Map<String, String> response = new HashMap<>();
-                response.put("sessionId", null); // No session for invalid OTP
                 response.put("user", "wrong"); // Invalid OTP response
 
                 // Return response with HTTP 400 Bad Request

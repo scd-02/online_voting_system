@@ -1,5 +1,6 @@
 package project.adp.voting_system_server.config;
 
+import org.hibernate.annotations.View;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,10 +11,12 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 // import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -21,8 +24,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // @Autowired
-    // private UserDetailsService userDetailsService;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -35,6 +38,8 @@ public class SecurityConfig {
                 // set the session management to stateless
                 // .sessionManagement(session ->
                 // session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .authenticationProvider(authenticationProvider())
                 .build();
     }
 
@@ -61,19 +66,14 @@ public class SecurityConfig {
     // return new InMemoryUserDetailsManager(user1, user2);
     // }
 
-    // @Bean
-    // public AuthenticationProvider authenticationProvider() {
-    //     // tell how to authenticate the users
-    //     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    //     authProvider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
-    //     authProvider.setUserDetailsService(userDetailsService);
-    //     return authProvider;
-    // }
-
-    // @Bean
-    // public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
-    //         return config.getAuthenticationManager();
-    // }
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        // tell how to authenticate the users
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setPasswordEncoder(NoOpPasswordEncoder.getInstance()); // Commented By AP
+        authProvider.setUserDetailsService(userDetailsService);
+        return authProvider;
+    }
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
@@ -87,5 +87,11 @@ public class SecurityConfig {
                         .allowCredentials(true); // Allow cookies or authorization headers
             }
         };
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }

@@ -2,8 +2,12 @@ package project.adp.voting_system_server.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,7 +56,10 @@ public class AuthenticationService {
 
         // Step 3: Set the Authentication in the SecurityContext
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
+        // Step 4: Create or retrieve the session and set the security context
+        request.getSession(true).setAttribute(
+                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                SecurityContextHolder.getContext());
         // Step 4: Create or retrieve the session and return its ID
         String sessionId = request.getSession(true).getId();
         // true ensures a new session is created if it doesn't exist
@@ -63,5 +70,52 @@ public class AuthenticationService {
         response.put("role", role);
 
         return response;
+    }
+
+    /**
+     * Get the profile details of the currently logged-in user.
+     *
+     * @return A map containing user details like user ID and role.
+     */
+    public Map<String, String> getCurrentUserProfile() {
+        Map<String, String> userProfile = new HashMap<>();
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Log the authentication details for debugging purposes
+        if (authentication == null) {
+            System.out.println("Authentication is null");
+        } else {
+            System.out.println("Authentication principal: " + authentication.getPrincipal());
+            System.out.println("Authentication authorities: " + authentication.getAuthorities());
+            System.out.println("Authentication details: " + authentication.getDetails());
+            System.out.println("Authentication name: " + authentication.getName());
+        }
+
+        // If authentication is an anonymous token, handle it properly
+        if (authentication instanceof AnonymousAuthenticationToken) {
+            // Handle anonymous user case (not authenticated)
+            userProfile.put("error", "User is not authenticated");
+            return userProfile;
+        }
+
+        if (authentication instanceof UsernamePasswordAuthenticationToken) {
+            // Step 2: Retrieve user ID (or username) and authorities from the
+            // Authentication token
+            String userId = (String) authentication.getPrincipal(); // Assuming user ID is the principal
+
+            // Step 3: Get the user's role(s) (authorities)
+            String role = "USER"; // Default to USER
+            if (!authentication.getAuthorities().isEmpty()) {
+                // Get the first authority (role)
+                role = authentication.getAuthorities().iterator().next().getAuthority();
+            }
+
+            // Step 4: Populate the user profile map with details
+            userProfile.put("userId", userId);
+            userProfile.put("role", role);
+        }
+
+        return userProfile;
     }
 }

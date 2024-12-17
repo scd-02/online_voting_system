@@ -15,7 +15,7 @@ export default function Login() {
 
       if (response.status === 200) {
         // Cache Aadhaar number
-        localStorage.setItem("aadhaarNumber", aadhaar);
+        // localStorage.setItem("aadhaarNumber", aadhaar);
 
         console.log("OTP sent successfully, redirecting to verification page.");
 

@@ -15,19 +15,20 @@ import project.adp.voting_system_server.model.User;
 import project.adp.voting_system_server.model.Admin;
 import project.adp.voting_system_server.service.UserService;
 import project.adp.voting_system_server.service.AdminService;
+import project.adp.voting_system_server.service.AuthenticationService;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final UserService userService; // Inject UserService to fetch users
-    private final AdminService adminService; // Inject AdminService to check for admin role
+    @Autowired
+    private UserService userService;
 
     @Autowired
-    public AuthController(UserService userService, AdminService adminService) {
-        this.userService = userService;
-        this.adminService = adminService;
-    }
+    private AdminService adminService;
+
+    @Autowired
+    private AuthenticationService authenticationService;
 
     @GetMapping("/checkAadhaar/{aadhaar}")
     public ResponseEntity<Map<String, Object>> checkAadhaar(@PathVariable String aadhaar) {
@@ -60,5 +61,11 @@ public class AuthController {
             response.put("message", "User not found");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
+    }
+
+    @GetMapping("/profile")
+    public Map<String, String> getUserProfile() {
+        // Call the method to fetch current user profile
+        return authenticationService.getCurrentUserProfile();
     }
 }
