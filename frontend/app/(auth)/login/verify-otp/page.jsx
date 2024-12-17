@@ -45,16 +45,21 @@ export default function OTPVerification() {
         try {
             setIsSubmitting(true);
             const response = await axios.get(`${API_URL}/otp/validate/${aadhaar}/${otp}`);
-            console.log(response)
+            console.log(response.data)
 
-            if (response.data === "exists") {
+            // Check the user status from the backend response
+            if (response.data.user === "exist") {
                 console.log("OTP verified successfully, redirecting to dashboard.");
-                window.location.href = "/dashboard"; // Redirect to the dashboard page
-            } else if (response.data === "new") {
+                // window.location.href = "/dashboard"; // Redirect to the dashboard page
+            } else if (response.data.user === "new") {
                 console.log("OTP verified successfully, redirecting to registration page.");
                 window.location.href = "/register"; // Redirect to the registration page
+            } else if (response.data.user === "wrong") {
+                alert("OTP verification failed. Please try again");
             } else {
-                alert("OTP verification failed. Please try again")
+                // Optional: Handle other unexpected cases or errors in the response
+                console.error("Unexpected response:", response.data);
+                alert("An unexpected error occurred. Please try again later.");
             }
         } catch (error) {
             console.error("Error verifying OTP:", error);

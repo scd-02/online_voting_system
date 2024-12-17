@@ -1,5 +1,6 @@
 package project.adp.voting_system_server.service;
 
+import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,10 @@ public class SmsService {
     // Send OTP to the phone number via Twilio API
     private void sendOtpViaTwilio(String phoneNumber, String otp) {
         try {
+            // Initialize Twilio with Account SID and Auth Token
+            Twilio.init(twilioConfig.getAccoundSid(), twilioConfig.getAuthToken());
+
+            // Send OTP message
             Message.creator(
                     new PhoneNumber(phoneNumber), // "To" phone number
                     new PhoneNumber(twilioConfig.getPhoneNumber()), // "From" phone number (Twilio number)

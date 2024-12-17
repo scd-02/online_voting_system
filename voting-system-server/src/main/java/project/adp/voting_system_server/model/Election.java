@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(indexes = @Index(name = "idx_region", columnList = "region"))
+@Table(indexes = @Index(name = "idx_state", columnList = "state")) // Updated index for state
 public class Election {
 
     @Id
@@ -15,9 +15,9 @@ public class Election {
     private String name;
 
     @Column(nullable = false)
-    private String region;
+    private String state; // Updated field to state
 
-    //aadhaarNumber
+    // AadhaarNumber
     @ElementCollection
     @CollectionTable(name = "election_eligible_voters", joinColumns = @JoinColumn(name = "election_id"))
     @Column(name = "voter_id")
@@ -46,12 +46,12 @@ public class Election {
         this.name = name;
     }
 
-    public String getRegion() {
-        return region;
+    public String getState() {
+        return state; // Updated getter
     }
 
-    public void setRegion(String region) {
-        this.region = region;
+    public void setState(String state) {
+        this.state = state; // Updated setter
     }
 
     public List<String> getEligibleVoters() {

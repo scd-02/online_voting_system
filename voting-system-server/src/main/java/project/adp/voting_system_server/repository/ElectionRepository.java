@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface ElectionRepository extends JpaRepository<Election, Long> {
     // Custom query to find elections by region
-    List<Election> findByRegion(String region);
+    List<Election> findByState(String state);
 }

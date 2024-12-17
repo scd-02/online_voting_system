@@ -3,6 +3,9 @@ package project.adp.voting_system_server.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "party", indexes = {
+        @Index(name = "idx_party_state", columnList = "state") // Updated index name and column
+})
 public class Party {
 
     @Id
@@ -12,25 +15,26 @@ public class Party {
     private String name;
     private String symbol;
 
-    // The leader is now a reference to the Candidate entity
-    // @ManyToOne
-
     @OneToOne
     @JoinColumn(name = "leader_id") // This will create a foreign key column named leader_id in the party table
     private Candidate leader;
 
-    private String agenda; // Changed attribute name to 'agenda'
+    private String agenda;
+
+    @Column(nullable = false)
+    private String state; // Renamed field to store the state of the party
 
     // Default constructor
     public Party() {
     }
 
     // Constructor with parameters
-    public Party(String name, String symbol, Candidate leader, String agenda) {
+    public Party(String name, String symbol, Candidate leader, String agenda, String state) {
         this.name = name;
         this.symbol = symbol;
-        this.leader = leader; // Leader is now a Candidate object
-        this.agenda = agenda; // Updated parameter
+        this.leader = leader;
+        this.agenda = agenda;
+        this.state = state; // Initialize the state
     }
 
     // Getters and Setters
@@ -59,18 +63,26 @@ public class Party {
     }
 
     public Candidate getLeader() {
-        return leader; // Updated getter to return the Candidate object
+        return leader;
     }
 
     public void setLeader(Candidate leader) {
-        this.leader = leader; // Updated setter to accept a Candidate object
+        this.leader = leader;
     }
 
     public String getAgenda() {
-        return agenda; // Updated getter
+        return agenda;
     }
 
     public void setAgenda(String agenda) {
-        this.agenda = agenda; // Updated setter
+        this.agenda = agenda;
+    }
+
+    public String getState() {
+        return state; // Updated getter
+    }
+
+    public void setState(String state) {
+        this.state = state; // Updated setter
     }
 }
