@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"; // Correct import from next/navigat
 import { ContestList, ImageGallery } from "@/components/shared/ContestList";
 import { Sidebar } from "@/components/shared/SideBar";
 import React, { useEffect, useState } from "react";
+import ElectionTileView from "@/components/shared/EledtionTileView";
 
 const UserDetailPage = () => {
   const { id } = useParams(); // Get the dynamic id from the URL using useParams()
@@ -44,12 +45,13 @@ const UserDetailPage = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-w-full min-h-screen bg-background">
       <Sidebar user={userData} />
-      <main className="flex-1 overflow-auto p-4">
-        <ContestList />
+      <div className="w-2/3 overflow-auto p-4">
+        {/* <ContestList /> */}
         {/* <ImageGalleryallery /> */}
-      </main>
+        <ElectionTileView />
+      </div>
     </div>
   );
 };

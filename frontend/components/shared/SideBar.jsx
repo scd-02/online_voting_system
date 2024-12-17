@@ -5,8 +5,8 @@ import { Mail, Phone, Calendar, Shield, Home, User } from "lucide-react";
 
 export function Sidebar({ user }) {
   return (
-    <div className="w-80 h-screen border-r bg-card p-6 ">
-      <div className="flex flex-col items-center space-y-4">
+    <div className="w-1/3 h-screen border-r bg-card p-6 ">
+      <div className="flex flex-col items-center justify-center space-y-4">
         {/* Avatar */}
         <Avatar className="h-24 w-24">
           <AvatarImage src={user.photograph} alt={user.fullName} />
@@ -42,10 +42,15 @@ export function Sidebar({ user }) {
           <Home className="h-5 w-5 text-muted-foreground" />
           <div>
             <span className="text-sm">
-              Address:<br /> {user.addressLine1}, <br />{user.addressLine2}, <br />{user.city}, {user.state} - {user.pinCode}
+              Address:
+              <br /> {user.addressLine1}, <br />
+              {user.addressLine2}, <br />
+              {user.city}, {user.state} - {user.pinCode}
             </span>
             <br />
-            <span className="text-sm">Residence Type: {user.residenceType}</span>
+            <span className="text-sm">
+              Residence Type: {user.residenceType}
+            </span>
           </div>
         </div>
 
@@ -60,7 +65,6 @@ export function Sidebar({ user }) {
           <User className="h-5 w-5 text-muted-foreground" />
           <span className="text-sm">Mother's Name: {user.motherName}</span>
         </div>
-
       </div>
     </div>
   );
