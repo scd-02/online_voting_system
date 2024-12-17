@@ -1,7 +1,7 @@
 // Add the "use client" directive to mark the component as a Client Component
 "use client";
 
-import { useParams } from 'next/navigation'; // Correct import from next/navigation for dynamic params
+import { useParams } from "next/navigation"; // Correct import from next/navigation for dynamic params
 import { ContestList, ImageGallery } from "@/components/shared/ContestList";
 import { Sidebar } from "@/components/shared/SideBar";
 import React, { useEffect, useState } from "react";
@@ -25,7 +25,8 @@ const UserDetailPage = () => {
         state: "State",
         pinCode: "123456",
         country: "Country",
-        photograph: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
+        photograph:
+          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
         mobileNumber: "(123) 456-7890",
         emailAddress: "john@example.com",
         fatherName: "Father Name",
@@ -46,8 +47,8 @@ const UserDetailPage = () => {
     <div className="flex min-h-screen bg-background">
       <Sidebar user={userData} />
       <main className="flex-1 overflow-auto p-4">
-        {/* <ContestList />
-        <ImageGallery /> */}
+        <ContestList />
+        {/* <ImageGalleryallery /> */}
       </main>
     </div>
   );
