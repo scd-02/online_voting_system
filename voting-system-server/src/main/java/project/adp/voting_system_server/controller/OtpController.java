@@ -52,12 +52,11 @@ public class OtpController {
                 Map<String, String> response = new HashMap<>();
 
                 // Authenticate user and get the session ID
-                // Map<String, String> authenticationResponse =
+                Map<String, String> authenticationResponse = authenticationService
+                        .authenticateAndReturnSession(aadharNumber, request);
 
-                authenticationService.authenticateAndReturnSession(aadharNumber, request);
-
-                // String sessionId = authenticationResponse.get("sessionId");
-                // response.put("sessionId", sessionId);
+                String sessionId = authenticationResponse.get("sessionId");
+                response.put("sessionId", sessionId);
 
                 // Check if user exists in the repository
                 if (userRepository.findById(aadharNumber).isPresent()) {

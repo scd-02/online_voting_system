@@ -32,7 +32,8 @@ export default function VoterSignUp() {
       const response = await axios.post(`${API_URL}/register/${aadhaar}`);
       if (response.status === 200) {
         console.log(response.data)
-        // window.location.href = "/dashboard"; // Redirect to the dashboard page
+        window.location.href = "/user"; // Redirect to the dashboard page
+        localStorage.removeItem("aadhaarNumber")
       }
     } catch (error) {
       console.log("error", error)

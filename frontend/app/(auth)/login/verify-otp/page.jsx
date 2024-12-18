@@ -1,15 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";  // Import js-cookie to manage cookies
 
 export default function OTPVerification() {
     const [otp, setOtp] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [aadhaar, setAadhaar] = useState("");
 
-    // Aadhaar number can be hardcoded or passed directly
-    const aadhaar = "YOUR_AADHAAR_NUMBER";  // Replace with actual Aadhaar number
+    // Fetch Aadhaar number from local storage on component mount
+    useEffect(() => {
+        const storedAadhaar = localStorage.getItem("aadhaarNumber"); // Replace "aadhaar" with the key used in local storage
+        if (storedAadhaar) {
+            setAadhaar(storedAadhaar);
+        } else {
+            alert("Aadhaar number not found in local storage. Please try again.");
+            // Optionally redirect or handle the missing Aadhaar scenario
+        }
+
+        // Set a timeout to redirect the user after 2 minutes (120,000 ms)
+        const timer = setTimeout(() => {
+            alert("Time expired! Redirecting to the login page.");
+            window.location.href = "/login"; // Redirect to a desired fallback page
+        }, 120000); // 2 minutes
+
+        // Cleanup timeout on component unmount
+        return () => clearTimeout(timer);
+    }, []);
 
     const handleOtpChange = (e) => {
         const value = e.target.value;
@@ -41,11 +59,16 @@ export default function OTPVerification() {
                 // Save the JSESSIONID cookie manually
                 Cookies.set('JSESSIONID', response.data.sessionId, { expires: 2 / 24, path: '/', secure: true, sameSite: 'None' });
                 // Redirect user to dashboard or other page
-                window.location.href = "/user"; 
+                window.location.href = "/user";
+                // remove aadhar from localStorage
+                localStorage.removeItem("aadhaarNumber")
+
             } else if (response.data.user === "new") {
+
                 console.log("OTP verified successfully, redirecting to registration page.");
                 Cookies.set('JSESSIONID', response.data.sessionId, { expires: 2 / 24, path: '/', secure: true, sameSite: 'None' });
                 window.location.href = "/register"; // Redirect to the registration page
+
             } else if (response.data.user === "wrong") {
                 alert("OTP verification failed. Please try again");
             } else {
