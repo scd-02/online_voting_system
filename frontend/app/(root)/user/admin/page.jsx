@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import PartyForm from "@/components/shared/PartyForm"; // Assuming PartyForm is a separate component
-import CandidateForm from "@/components/shared/CandidateForm"; // Assuming CandidateForm is a separate component
-import ElectionForm from "@/components/shared/ElectionForm"; // Assuming ElectionForm is a separate component
+import Modal from "@/components/shared/Modal";
+import CandidateForm from "@/components/shared/CandidateForm";
+import PartyForm from "@/components/shared/PartyForm";
+import ElectionForm from "@/components/shared/ElectionForm";
 
 const AdminPage = () => {
     const [candidates, setCandidates] = useState([]);
@@ -15,9 +16,9 @@ const AdminPage = () => {
     const [partyFilter, setPartyFilter] = useState("");
     const [electionFilter, setElectionFilter] = useState("");
 
-    const [showForm, setShowForm] = useState(false);
-    const [formType, setFormType] = useState(""); // 'party', 'candidate', or 'election'
-    const [selectedItem, setSelectedItem] = useState(null); // Store selected item for editing
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentForm, setCurrentForm] = useState(null);
+    const [currentItem, setCurrentItem] = useState(null);
 
     const fetchData = async () => {
         try {
@@ -60,15 +61,15 @@ const AdminPage = () => {
     };
 
     const handleEdit = (item, type) => {
-        setSelectedItem(item);
-        setFormType(type);
-        setShowForm(true);
+        setCurrentItem(item);
+        setCurrentForm(type);
+        setIsModalOpen(true);
     };
 
     const handleAdd = (type) => {
-        setSelectedItem(null);
-        setFormType(type);
-        setShowForm(true);
+        setCurrentItem(null);
+        setCurrentForm(type);
+        setIsModalOpen(true);
     };
 
     const renderColumn = (data, filter, setFilter, type) => {
@@ -135,45 +136,27 @@ const AdminPage = () => {
         );
     };
 
+    const renderForm = () => {
+        if (currentForm === "candidates") {
+            return <CandidateForm candidate={currentItem} onClose={() => setIsModalOpen(false)} onSave={fetchData} />;
+        }
+        if (currentForm === "parties") {
+            return <PartyForm party={currentItem} onClose={() => setIsModalOpen(false)} onSave={fetchData} />;
+        }
+        if (currentForm === "elections") {
+            return <ElectionForm election={currentItem} onClose={() => setIsModalOpen(false)} onSave={fetchData} />;
+        }
+        return null;
+    };
+
     return (
         <div className="flex min-h-screen w-full bg-gray-100 p-8 space-x-8">
             {renderColumn(candidates, candidateFilter, setCandidateFilter, "candidates")}
             {renderColumn(parties, partyFilter, setPartyFilter, "parties")}
             {renderColumn(elections, electionFilter, setElectionFilter, "elections")}
-
-            {showForm && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
-                    <div className="bg-white p-6 rounded shadow-lg w-1/3">
-                        <h2 className="text-2xl font-bold mb-4">
-                            {formType === "party" && "Party Form"}
-                            {formType === "candidate" && "Candidate Form"}
-                            {formType === "election" && "Election Form"}
-                        </h2>
-
-                        {formType === "party" && (
-                            <PartyForm
-                                party={selectedItem}
-                                onClose={() => setShowForm(false)}
-                                onSave={() => { fetchData(); setShowForm(false); }}
-                            />
-                        )}
-                        {formType === "candidate" && (
-                            <CandidateForm
-                                candidate={selectedItem}
-                                onClose={() => setShowForm(false)}
-                                onSave={() => { fetchData(); setShowForm(false); }}
-                            />
-                        )}
-                        {formType === "election" && (
-                            <ElectionForm
-                                election={selectedItem}
-                                onClose={() => setShowForm(false)}
-                                onSave={() => { fetchData(); setShowForm(false); }}
-                            />
-                        )}
-                    </div>
-                </div>
-            )}
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+                {renderForm()}
+            </Modal>
         </div>
     );
 };
