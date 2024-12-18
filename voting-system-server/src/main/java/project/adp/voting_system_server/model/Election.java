@@ -17,12 +17,6 @@ public class Election {
     @Column(nullable = false)
     private String state; // Updated field to state
 
-    // AadhaarNumber
-    @ElementCollection
-    @CollectionTable(name = "election_eligible_voters", joinColumns = @JoinColumn(name = "election_id"))
-    @Column(name = "voter_id")
-    private List<String> eligibleVoters;
-
     @ElementCollection
     @CollectionTable(name = "election_eligible_partys", joinColumns = @JoinColumn(name = "election_id"))
     @Column(name = "party_id")
@@ -52,14 +46,6 @@ public class Election {
 
     public void setState(String state) {
         this.state = state; // Updated setter
-    }
-
-    public List<String> getEligibleVoters() {
-        return eligibleVoters;
-    }
-
-    public void setEligibleVoters(List<String> eligibleVoters) {
-        this.eligibleVoters = eligibleVoters;
     }
 
     public List<String> getEligiblePartys() {

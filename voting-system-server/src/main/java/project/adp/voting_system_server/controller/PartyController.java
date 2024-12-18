@@ -14,17 +14,13 @@ import java.util.Optional;
 @RequestMapping("/parties")
 public class PartyController {
 
-    private final PartyService partyService;
-
     @Autowired
-    public PartyController(PartyService partyService) {
-        this.partyService = partyService;
-    }
+    private PartyService partyService;
 
     // Get all parties
-    @GetMapping
-    public List<Party> getAllParties() {
-        return partyService.getAllParties();
+    @GetMapping("/getAllParties")
+    public ResponseEntity<List<Party>> getAllParties() {
+        return ResponseEntity.ok(partyService.getAllParties());
     }
 
     // Get a party by ID

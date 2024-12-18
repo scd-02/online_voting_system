@@ -9,17 +9,13 @@ import project.adp.voting_system_server.service.ElectionService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/elections")
+@RequestMapping("/elections")
 public class ElectionController {
 
-    private final ElectionService electionService;
-
     @Autowired
-    public ElectionController(ElectionService electionService) {
-        this.electionService = electionService;
-    }
+    private ElectionService electionService;
 
-    @GetMapping
+    @GetMapping("/getAllElections")
     public ResponseEntity<List<Election>> getAllElections() {
         return ResponseEntity.ok(electionService.getAllElections());
     }
@@ -36,7 +32,7 @@ public class ElectionController {
         return ResponseEntity.ok(electionService.getElectionsByRegion(region));
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<Election> createElection(@RequestBody Election election) {
         return ResponseEntity.ok(electionService.createElection(election));
     }

@@ -9,20 +9,24 @@ import project.adp.voting_system_server.service.VoteService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/votes")
+@RequestMapping("/vote")
 public class VoteController {
 
-    private final VoteService voteService;
-
     @Autowired
-    public VoteController(VoteService voteService) {
-        this.voteService = voteService;
+    private VoteService voteService;
+
+    // Save a new vote (cached and batched)
+    @PostMapping
+    public ResponseEntity<String> saveVote(@RequestBody Vote vote) {
+        voteService.saveVote(vote);
+        return ResponseEntity.ok("Vote cached successfully. It will be saved to the database in a batch.");
     }
 
-    // Save a new vote
-    @PostMapping
-    public ResponseEntity<Vote> saveVote(@RequestBody Vote vote) {
-        return ResponseEntity.ok(voteService.saveVote(vote));
+    // Endpoint to manually flush the cache
+    @PostMapping("/flush")
+    public ResponseEntity<String> flushVotes() {
+        voteService.flushVotesToDatabase();
+        return ResponseEntity.ok("Cached votes flushed to the database.");
     }
 
     // Get all votes

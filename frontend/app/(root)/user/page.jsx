@@ -3,6 +3,7 @@
 import { Sidebar } from "@/components/shared/SideBar";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import ElectionTileView from "@/components/shared/EledtionTileView";
 
 const UserDetailPage = () => {
   const [userData, setUserData] = useState(null);
@@ -88,19 +89,9 @@ const UserDetailPage = () => {
   }
 
   return (
-    <div className="flex min-h-full bg-background">
+    <div className="flex min-h-full w-full bg-background">
       <Sidebar user={userData} />
-      <main className="flex-1 overflow-auto p-4">
-        {/* You can now use profileData for rendering profile-specific information */}
-        <div>
-          {/* <h2>Profile Information</h2>
-          {profileData ? (
-            <pre>{JSON.stringify(profileData, null, 2)}</pre>
-          ) : (
-            <p>Loading profile data...</p>
-          )} */}
-        </div>
-      </main>
+      <ElectionTileView />
     </div>
   );
 };

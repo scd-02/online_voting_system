@@ -11,20 +11,16 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("admin/candidates")
+@RequestMapping("/candidates")
 public class CandidateController {
 
-    private final CandidateService candidateService;
-
     @Autowired
-    public CandidateController(CandidateService candidateService) {
-        this.candidateService = candidateService;
-    }
+    private CandidateService candidateService;
 
     // Get all candidates
-    @GetMapping
-    public List<Candidate> getAllCandidates() {
-        return candidateService.getAllCandidates();
+    @GetMapping("/getAllCandidates")
+    public ResponseEntity<List<Candidate>> getAllCandidates() {
+        return ResponseEntity.ok(candidateService.getAllCandidates());
     }
 
     // Get a candidate by ID
@@ -36,7 +32,7 @@ public class CandidateController {
     }
 
     // Create a new candidate
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<Candidate> createCandidate(@RequestBody Candidate candidate) {
         Candidate savedCandidate = candidateService.saveCandidate(candidate);
         return ResponseEntity.ok(savedCandidate);

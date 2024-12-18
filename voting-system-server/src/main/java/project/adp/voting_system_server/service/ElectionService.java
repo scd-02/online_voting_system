@@ -46,7 +46,6 @@ public class ElectionService {
         Election election = new Election();
         election.setName(electionPayload.getName());
         election.setState(electionPayload.getState());
-        election.setEligibleVoters(new ArrayList<>()); // Start with empty list
         election.setEligiblePartys(new ArrayList<>()); // Start with empty list
         election = electionRepository.save(election);
 
@@ -60,7 +59,7 @@ public class ElectionService {
         // Save updated election with parties
         election = electionRepository.save(election);
 
-        // Step 3: Fetch all users from the region
+        // Step 3: Fetch all users from the region and associate them with the election
         List<User> usersInRegion = userRepository.findByState(electionPayload.getState());
         for (User user : usersInRegion) {
             List<String> userElectionList = user.getElectionList();
@@ -79,7 +78,6 @@ public class ElectionService {
         return electionRepository.findById(id).map(election -> {
             election.setName(electionDetails.getName());
             election.setState(electionDetails.getState());
-            election.setEligibleVoters(electionDetails.getEligibleVoters());
             election.setEligiblePartys(electionDetails.getEligiblePartys());
             return electionRepository.save(election);
         }).orElseThrow(() -> new RuntimeException("Election not found with id " + id));

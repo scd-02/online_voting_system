@@ -1,5 +1,7 @@
 package project.adp.voting_system_server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -14,6 +16,7 @@ public class Candidate {
 
     @ManyToOne
     @JoinColumn(name = "party_id", nullable = false)
+    @JsonIgnore // Prevent cyclic reference to Party when serializing Candidate
     private Party party;
 
     // Default constructor

@@ -1,5 +1,7 @@
 package project.adp.voting_system_server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -17,6 +19,7 @@ public class Party {
 
     @OneToOne
     @JoinColumn(name = "leader_id") // This will create a foreign key column named leader_id in the party table
+    @JsonIgnore // Prevent cyclic reference to Candidate when serializing Party
     private Candidate leader;
 
     private String agenda;
