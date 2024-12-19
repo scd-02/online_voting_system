@@ -7,45 +7,72 @@ axios.defaults.withCredentials = true;
 
 const PartyForm = ({ party, candidates, onClose, onSave }) => {
 
-    console.log("party",party)
-    console.log("candidates",candidates)
+    console.log("party", party)
+    console.log("candidates", candidates)
 
     const [name, setName] = useState(party ? party.name : '');
     const [agenda, setAgenda] = useState(party ? party.agenda : '');
-    const [leaderId, setLeaderId] = useState(party && party.leader ? party.leader.aadhaarNumber : '');
+    const [leaderAadhaar, setLeaderAadhaar] = useState(party && party.leaderAadhaarNumber ? party.leaderAadhaarNumber : '');
     const [stateValue, setStateValue] = useState(party ? party.state : '');
     const [error, setError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false); // New state to handle submission
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        // Prevent multiple submissions
+        if (isSubmitting) return;
+
         // Validate inputs
         if (!name || !agenda || !stateValue) {
             setError('Name, Agenda, and State are required!');
             return;
         }
 
+        setIsSubmitting(true); // Set submitting state
+
         const API_URL = process.env.NEXT_PUBLIC_API_URL;
         const partyData = {
             name,
             agenda,
-            leader: leaderId ? { aadhaarNumber: leaderId } : null,
             state: stateValue,
+            leaderAadhaarNumber: leaderAadhaar || null, // Send the leader's Aadhaar number if provided
         };
 
         try {
             let response;
+            let newCandidate = null;
+
             if (party) {
                 // Edit existing party
                 response = await axios.put(`${API_URL}/party/${party.name}`, partyData);
+                onSave(response.data, false);
             } else {
                 // Add new party
                 response = await axios.post(`${API_URL}/party`, partyData);
+                const newParty = response.data;
+
+                // Extract newCandidate from the response if leaderAadhaarNumber is provided
+                if (newParty.leaderAadhaarNumber) {
+                    newCandidate = {
+                        aadhaarNumber: newParty.leaderAadhaarNumber,
+                        partyName: newParty.name,
+                        name: '', // Assuming name is optional or fetched elsewhere
+                    };
+                }
+
+                onSave(newParty, true, newCandidate);
             }
-            onSave(response.data, !party);
+
             onClose();
         } catch (err) {
             console.error(err);
-            setError('Error saving party data!');
+            if (err.response && err.response.data && err.response.data.message) {
+                setError(err.response.data.message);
+            } else {
+                setError('Error saving party data!');
+            }
+        } finally {
+            setIsSubmitting(false); // Reset submitting state
         }
     };
 
@@ -76,43 +103,69 @@ const PartyForm = ({ party, candidates, onClose, onSave }) => {
                         required
                     />
                 </div>
-                <div className="mb-4">
-                    <label className="block mb-2">Party Leader</label>
-                    {party && party.leader && (
-                        <p className="mb-2">
-                            Current Leader: <strong>{party.leader.aadhaarNumber}</strong>
+                {!party && (
+                    <div className="mb-4">
+                        <label className="block mb-2">Leader Aadhaar Number</label>
+                        <input
+                            type="text"
+                            className="w-full p-2 border border-gray-300 rounded"
+                            placeholder="Leader Aadhaar Number"
+                            value={leaderAadhaar}
+                            onChange={(e) => setLeaderAadhaar(e.target.value)}
+                        />
+                    </div>
+                )}
+                {party && (
+                    <div className="mb-4">
+                        <label className="block mb-2">Leader</label>
+                        <select
+                            className="w-full p-2 border border-gray-300 rounded"
+                            value={leaderAadhaar}
+                            onChange={(e) => setLeaderAadhaar(e.target.value)}
+                        >
+                            <option value="">Select Leader</option>
+                            {candidates
+                                .filter(candidate => candidate.partyName && candidate.partyName === party.name)
+                                .map(candidate => (
+                                    <option key={candidate.aadhaarNumber} value={candidate.aadhaarNumber}>
+                                        {candidate.aadhaarNumber}
+                                    </option>
+                                ))}
+                        </select>
+                    </div>
+                )}
+                {party && party.leaderAadhaarNumber && (
+                    <div className="mb-4">
+                        <p>
+                            Current Leader: <strong>{party.leaderAadhaarNumber}</strong>
                         </p>
-                    )}
-                    <select
-                        className="w-full p-2 border border-gray-300 rounded"
-                        value={leaderId}
-                        onChange={(e) => setLeaderId(e.target.value)}
-                    >
-                        <option value="">Select Leader</option>
-                        {candidates
-                            .filter(candidate => !party || (candidate.party && candidate.party.name === party.name))
-                            .map(candidate => (
-                                <option key={candidate.aadhaarNumber} value={candidate.aadhaarNumber}>
-                                    {candidate.aadhaarNumber} {candidate.name ? ` - ${candidate.name}` : ''}
-                                </option>
-                            ))}
-                    </select>
-                </div>
+                    </div>
+                )}
                 <div className="mb-4">
                     <label className="block mb-2">State</label>
                     <StateDropdown value={stateValue} onChange={(e) => setStateValue(e.target.value)} />
                 </div>
                 <div className="flex justify-between">
-                    <button type="button" onClick={onClose} className="bg-gray-500 text-white px-4 py-2 rounded">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="bg-gray-500 text-white px-4 py-2 rounded"
+                        disabled={isSubmitting} // Disable while submitting
+                    >
                         Cancel
                     </button>
-                    <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-                        {party ? 'Update Party' : 'Add Party'}
+                    <button
+                        type="submit"
+                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                        disabled={isSubmitting} // Disable while submitting
+                    >
+                        {isSubmitting ? (party ? 'Updating...' : 'Adding...') : (party ? 'Update Party' : 'Add Party')}
                     </button>
                 </div>
             </form>
         </div>
     );
+
 };
 
 export default PartyForm;

@@ -57,22 +57,27 @@ const AdminPage = () => {
                 return [...prevCandidates, updatedCandidate];
             } else {
                 return prevCandidates.map(candidate =>
-                    candidate.id === updatedCandidate.id ? updatedCandidate : candidate
+                    candidate.aadhaarNumber === updatedCandidate.aadhaarNumber ? updatedCandidate : candidate
                 );
             }
         });
     };
 
-    const handlePartySave = (updatedParty, isNew) => {
+    const handlePartySave = (updatedParty, isNew, newCandidate) => {
         setParties(prevParties => {
             if (isNew) {
                 return [...prevParties, updatedParty];
             } else {
                 return prevParties.map(party =>
-                    party.id === updatedParty.id ? updatedParty : party
+                    party.name === updatedParty.name ? updatedParty : party
                 );
             }
         });
+
+        // If a new candidate is created, update the candidates state
+        if (isNew && newCandidate) {
+            setCandidates(prevCandidates => [...prevCandidates, newCandidate]);
+        }
     };
 
     const handleElectionSave = (updatedElection, isNew) => {
@@ -81,7 +86,7 @@ const AdminPage = () => {
                 return [...prevElections, updatedElection];
             } else {
                 return prevElections.map(election =>
-                    election.id === updatedElection.id ? updatedElection : election
+                    election.name === updatedElection.name ? updatedElection : election
                 );
             }
         });
@@ -94,17 +99,43 @@ const AdminPage = () => {
     };
 
     const handleDelete = async (id, type) => {
+        switch (type) {
+            case "candidates": type = "candidate"; break;
+            case "parties": type = "party"; break;
+            case "elections": type = "election"; break;
+        }
+
+        const confirmDelete = window.confirm(`Are you sure you want to delete this ${type}?`);
+        if (!confirmDelete) return;
+
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
             await axios.delete(`${API_URL}/${type}/${id}`);
 
             // Update the state without re-fetching
-            if (type === 'candidates') {
-                setCandidates(prevCandidates => prevCandidates.filter(candidate => candidate.id !== id));
-            } else if (type === 'parties') {
-                setParties(prevParties => prevParties.filter(party => party.id !== id));
-            } else if (type === 'elections') {
-                setElections(prevElections => prevElections.filter(election => election.id !== id));
+            if (type === 'candidate') {
+                setCandidates((prevCandidates) =>
+                    prevCandidates.filter((candidate) => candidate.aadhaarNumber !== id)
+                );
+            } else if (type === 'party') {
+                // Find the deleted party to identify its leader
+                const deletedParty = parties.find((party) => party.name === id);
+                setParties((prevParties) =>
+                    prevParties.filter((party) => party.name !== id)
+                );
+
+                if (deletedParty && deletedParty.leaderAadhaarNumber) {
+                    setCandidates((prevCandidates) =>
+                        prevCandidates.filter(
+                            (candidate) => candidate.aadhaarNumber !== deletedParty.leaderAadhaarNumber
+                        )
+                    );
+                }
+            } else if (type === 'election') {
+                setElections((prevElections) =>
+                    prevElections.filter((election) => election.name !== id)
+                );
             }
         } catch (error) {
             console.error(`Error deleting ${type}:`, error);
@@ -160,14 +191,13 @@ const AdminPage = () => {
                     className="mb-4 px-2 py-1 border rounded w-full"
                 />
                 <div className="flex-grow w-full bg-white p-4 rounded-lg shadow overflow-y-auto">
-                    {/* Removed key={type} from <ul> */}
                     <ul>
                         {validItems.map(item => (
                             <li key={item.aadhaarNumber || item.id || item.name} className="mb-2 border-b pb-2">
                                 {type === "candidates" && (
                                     <div>
                                         <p><strong>Aadhaar Number:</strong> {item.aadhaarNumber}</p>
-                                        <p className="mb-2"><strong>Party:</strong>{item.partyName}</p>
+                                        <p className="mb-2"><strong>Party:</strong> {item.partyName}</p>
                                         <button onClick={() => handleEdit(item, type)} className="rounded px-4 py-1 mr-4 bg-blue-500 text-white">Edit</button>
                                         <button onClick={() => handleDelete(item.aadhaarNumber, type)} className="text-red-500 ml-2">Delete</button>
                                     </div>
@@ -223,7 +253,7 @@ const AdminPage = () => {
                     </ul>
                 </div>
                 <button onClick={() => handleAdd(type)} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded self-end">
-                    Add {type.slice(0, -1)}
+                    Add {type}
                 </button>
             </div>
         );

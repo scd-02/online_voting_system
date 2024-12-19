@@ -2,11 +2,11 @@ package project.adp.voting_system_server.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import project.adp.voting_system_server.model.Candidate;
 import project.adp.voting_system_server.repository.CandidateRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CandidateService {
@@ -18,8 +18,8 @@ public class CandidateService {
         return candidateRepository.findAll();
     }
 
-    public Candidate getCandidateByAadhaarNumber(String aadhaarNumber) {
-        return candidateRepository.findById(aadhaarNumber).orElse(null);
+    public Optional<Candidate> getCandidateByAadhaarNumber(String aadhaarNumber) {
+        return candidateRepository.findById(aadhaarNumber);
     }
 
     public Candidate saveCandidate(Candidate candidate) {

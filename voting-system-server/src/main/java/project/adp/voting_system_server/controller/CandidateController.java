@@ -27,12 +27,9 @@ public class CandidateController {
 
     @GetMapping("/{aadhaarNumber}")
     public ResponseEntity<Candidate> getCandidateByAadhaarNumber(@PathVariable String aadhaarNumber) {
-        Candidate candidate = candidateService.getCandidateByAadhaarNumber(aadhaarNumber);
-        if (candidate != null) {
-            return ResponseEntity.ok(candidate);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return candidateService.getCandidateByAadhaarNumber(aadhaarNumber)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/create")
