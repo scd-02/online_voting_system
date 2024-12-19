@@ -7,45 +7,26 @@ import project.adp.voting_system_server.model.Candidate;
 import project.adp.voting_system_server.repository.CandidateRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CandidateService {
 
-    private final CandidateRepository candidateRepository;
-
     @Autowired
-    public CandidateService(CandidateRepository candidateRepository) {
-        this.candidateRepository = candidateRepository;
-    }
+    private CandidateRepository candidateRepository;
 
-    // Create or Update a candidate
-    public Candidate saveCandidate(Candidate candidate) {
-        return candidateRepository.save(candidate);
-    }
-
-    // Get all candidates
     public List<Candidate> getAllCandidates() {
         return candidateRepository.findAll();
     }
 
-    // Get a candidate by ID
-    public Optional<Candidate> getCandidateById(Long id) {
-        return candidateRepository.findById(id);
+    public Candidate getCandidateByAadhaarNumber(String aadhaarNumber) {
+        return candidateRepository.findById(aadhaarNumber).orElse(null);
     }
 
-    // Get candidates by party_id
-    public List<Candidate> getCandidatesByPartyId(Long partyId) {
-        return candidateRepository.findByPartyId(partyId); // Custom query by party_id
+    public Candidate saveCandidate(Candidate candidate) {
+        return candidateRepository.save(candidate);
     }
 
-    // Get candidates by aadhaarNumber
-    public List<Candidate> getCandidatesByAadhaarNumber(String aadhaarNumber) {
-        return candidateRepository.findByAadhaarNumber(aadhaarNumber); // Custom query by aadhaarNumber
-    }
-
-    // Delete a candidate
-    public void deleteCandidate(Long id) {
-        candidateRepository.deleteById(id);
+    public void deleteCandidate(String aadhaarNumber) {
+        candidateRepository.deleteById(aadhaarNumber);
     }
 }

@@ -1,22 +1,21 @@
 package project.adp.voting_system_server.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "candidates", indexes = { @Index(name = "idx_party_id", columnList = "party_id") })
+@Table(indexes = { @Index(name = "idx_party_id", columnList = "party_id") })
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "aadhaarNumber")
 public class Candidate {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     private String aadhaarNumber; // Changed userId to aadhaarNumber
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "party_id", nullable = false)
-    @JsonIgnore // Prevent cyclic reference to Party when serializing Candidate
     private Party party;
 
     // Default constructor
@@ -30,20 +29,12 @@ public class Candidate {
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getAadhaarNumber() {
-        return aadhaarNumber; // Updated getter
+        return aadhaarNumber;
     }
 
     public void setAadhaarNumber(String aadhaarNumber) {
-        this.aadhaarNumber = aadhaarNumber; // Updated setter
+        this.aadhaarNumber = aadhaarNumber;
     }
 
     public Party getParty() {
@@ -52,5 +43,13 @@ public class Candidate {
 
     public void setParty(Party party) {
         this.party = party;
+    }
+
+    @Override
+    public String toString() {
+        return "Candidate{" +
+                "aadhaarNumber='" + aadhaarNumber + '\'' +
+                ", party=" + party +
+                '}';
     }
 }

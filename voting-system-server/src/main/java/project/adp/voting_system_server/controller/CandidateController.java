@@ -3,71 +3,47 @@ package project.adp.voting_system_server.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import project.adp.voting_system_server.dto.CandidateDTO;
 import project.adp.voting_system_server.model.Candidate;
 import project.adp.voting_system_server.service.CandidateService;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/candidates")
+@RequestMapping("/candidate")
 public class CandidateController {
 
     @Autowired
     private CandidateService candidateService;
 
-    // Get all candidates
     @GetMapping("/getAllCandidates")
-    public ResponseEntity<List<Candidate>> getAllCandidates() {
-        return ResponseEntity.ok(candidateService.getAllCandidates());
+    public List<CandidateDTO> getAllCandidates() {
+        List<Candidate> candidates = candidateService.getAllCandidates();
+        return candidates.stream()
+                .map(CandidateDTO::new)
+                .collect(Collectors.toList());
     }
 
-    // Get a candidate by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Candidate> getCandidateById(@PathVariable Long id) {
-        Optional<Candidate> candidate = candidateService.getCandidateById(id);
-        return candidate.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    @GetMapping("/{aadhaarNumber}")
+    public ResponseEntity<Candidate> getCandidateByAadhaarNumber(@PathVariable String aadhaarNumber) {
+        Candidate candidate = candidateService.getCandidateByAadhaarNumber(aadhaarNumber);
+        if (candidate != null) {
+            return ResponseEntity.ok(candidate);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    // Create a new candidate
     @PostMapping("/create")
     public ResponseEntity<Candidate> createCandidate(@RequestBody Candidate candidate) {
         Candidate savedCandidate = candidateService.saveCandidate(candidate);
         return ResponseEntity.ok(savedCandidate);
     }
 
-    // Update a candidate
-    @PutMapping("/{id}")
-    public ResponseEntity<Candidate> updateCandidate(@PathVariable Long id, @RequestBody Candidate candidate) {
-        if (!candidateService.getCandidateById(id).isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-        candidate.setId(id); // Ensure the ID is not changed
-        Candidate updatedCandidate = candidateService.saveCandidate(candidate);
-        return ResponseEntity.ok(updatedCandidate);
-    }
-
-    // Delete a candidate
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCandidate(@PathVariable Long id) {
-        if (!candidateService.getCandidateById(id).isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-        candidateService.deleteCandidate(id);
+    @DeleteMapping("/{aadhaarNumber}")
+    public ResponseEntity<Void> deleteCandidate(@PathVariable String aadhaarNumber) {
+        candidateService.deleteCandidate(aadhaarNumber);
         return ResponseEntity.noContent().build();
-    }
-
-    // Get candidates by party_id
-    @GetMapping("/party/{partyId}")
-    public List<Candidate> getCandidatesByPartyId(@PathVariable Long partyId) {
-        return candidateService.getCandidatesByPartyId(partyId);
-    }
-
-    // Get candidates by aadhaarNumber
-    @GetMapping("/aadhaar/{aadhaarNumber}")
-    public List<Candidate> getCandidatesByAadhaarNumber(@PathVariable String aadhaarNumber) {
-        return candidateService.getCandidatesByAadhaarNumber(aadhaarNumber);
     }
 }

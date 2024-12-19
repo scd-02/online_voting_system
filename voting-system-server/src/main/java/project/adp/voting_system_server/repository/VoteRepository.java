@@ -16,4 +16,6 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
     // Count votes for a specific party in an election
     @Query("SELECT COUNT(v) FROM Vote v WHERE v.electionId = :electionId AND v.partyId = :partyId")
     Long countVotesByElectionIdAndPartyId(Long electionId, String partyId);
+
+    List<Vote> findAllByVoterId(String voterId);
 }

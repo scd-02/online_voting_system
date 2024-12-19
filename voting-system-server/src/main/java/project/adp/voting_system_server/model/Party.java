@@ -1,25 +1,24 @@
 package project.adp.voting_system_server.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "party", indexes = {
         @Index(name = "idx_party_state", columnList = "state") // Updated index name and column
 })
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "name")
 public class Party {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String name;
-    private String symbol;
+    private String name; // Changed to use 'name' as the primary key
 
     @OneToOne
     @JoinColumn(name = "leader_id") // This will create a foreign key column named leader_id in the party table
-    @JsonIgnore // Prevent cyclic reference to Candidate when serializing Party
+    @JsonManagedReference
     private Candidate leader;
 
     private String agenda;
@@ -32,37 +31,20 @@ public class Party {
     }
 
     // Constructor with parameters
-    public Party(String name, String symbol, Candidate leader, String agenda, String state) {
+    public Party(String name, Candidate leader, String agenda, String state) {
         this.name = name;
-        this.symbol = symbol;
         this.leader = leader;
         this.agenda = agenda;
         this.state = state; // Initialize the state
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
     }
 
     public Candidate getLeader() {

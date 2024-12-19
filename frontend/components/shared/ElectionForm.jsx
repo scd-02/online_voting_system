@@ -3,60 +3,45 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import StateDropdown from './StateDropdown';
 
-const ElectionForm = ({ election, onClose, onSave }) => {
+axios.defaults.withCredentials = true;
+
+const ElectionForm = ({ election, parties, onClose, onSave }) => {
     const [name, setName] = useState(election ? election.name : '');
     const [state, setState] = useState(election ? election.state : '');
-    const [eligibleParties, setEligibleParties] = useState(election ? election.eligiblePartys : []);
+    const [eligiblePartyIds, setEligiblePartyIds] = useState(
+        election && election.eligiblePartys ? election.eligiblePartys.map(party => party.id.toString()) : []
+    );
     const [error, setError] = useState('');
 
-    const [parties, setParties] = useState([]);
-
-    useEffect(() => {
-        // Fetch all parties for the election form
-        axios.get('/api/parties/getAllParties')
-            .then(response => {
-                setParties(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching parties:', error);
-            });
-    }, []);
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!name || !state || eligibleParties.length === 0) {
+        if (!name || !state || eligiblePartyIds.length === 0) {
             setError('All fields are required!');
             return;
         }
 
+        const API_URL = process.env.NEXT_PUBLIC_API_URL;
         const electionData = {
             name,
             state,
-            eligiblePartys: eligibleParties
+            eligiblePartys: eligiblePartyIds.map(id => ({ id: parseInt(id) })),
         };
 
-        if (election) {
-            // Edit existing election
-            axios.put(`/api/elections/${election.id}`, electionData)
-                .then(() => {
-                    onSave();
-                    onClose();
-                })
-                .catch(err => {
-                    console.error(err);
-                    setError('Error saving election data!');
-                });
-        } else {
-            // Add new election
-            axios.post('/api/elections', electionData)
-                .then(() => {
-                    onSave();
-                    onClose();
-                })
-                .catch(err => {
-                    console.error(err);
-                    setError('Error adding election!');
-                });
+        try {
+            axios.defaults.withCredentials = true;
+            let response;
+            if (election) {
+                // Edit existing election
+                response = await axios.put(`${API_URL}/elections/${election.id}`, electionData);
+            } else {
+                // Add new election
+                response = await axios.post(`${API_URL}/elections`, electionData);
+            }
+            onSave(response.data, !election);
+            onClose();
+        } catch (err) {
+            console.error(err);
+            setError('Error saving election data!');
         }
     };
 
@@ -78,14 +63,23 @@ const ElectionForm = ({ election, onClose, onSave }) => {
                     <StateDropdown value={state} onChange={(e) => setState(e.target.value)} />
                 </div>
                 <div className="mb-4">
+                    {election && election.eligiblePartys && election.eligiblePartys.length > 0 && (
+                        <p className="mb-2">
+                            Current Eligible Parties:{" "}
+                            <strong>{election.eligiblePartys.map((p) => p.name).join(", ")}</strong>
+                        </p>
+                    )}
+                    <label className="block mb-2">Eligible Parties:</label>
                     <select
                         multiple
                         className="w-full p-2 border border-gray-300 rounded"
-                        value={eligibleParties}
-                        onChange={(e) => setEligibleParties(Array.from(e.target.selectedOptions, option => option.value))}
+                        value={eligiblePartyIds}
+                        onChange={(e) =>
+                            setEligiblePartyIds(Array.from(e.target.selectedOptions, option => option.value))
+                        }
                     >
                         {parties.map((party) => (
-                            <option key={party.id} value={party.id}>
+                            <option key={party.id} value={party.id.toString()}>
                                 {party.name}
                             </option>
                         ))}

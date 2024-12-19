@@ -15,7 +15,7 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
-    @GetMapping
+    @GetMapping("/getAllAdmins")
     public ResponseEntity<List<Admin>> getAllAdmins() {
         List<Admin> admins = adminService.getAllAdmins();
         return ResponseEntity.ok(admins);
@@ -27,7 +27,7 @@ public class AdminController {
         return admin != null ? ResponseEntity.ok(admin) : ResponseEntity.notFound().build();
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<Admin> createAdmin(@RequestBody Admin admin) {
         Admin createdAdmin = adminService.createAdmin(admin);
         return ResponseEntity.ok(createdAdmin);

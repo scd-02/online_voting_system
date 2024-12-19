@@ -52,7 +52,7 @@ public class ElectionService {
         // Step 2: Fetch all party IDs from the region
         List<Party> partiesInRegion = partyRepository.findByState(electionPayload.getState());
         List<String> partyIds = partiesInRegion.stream()
-                .map(party -> String.valueOf(party.getId()))
+                .map(party -> String.valueOf(party.getName()))
                 .collect(Collectors.toList());
         election.setEligiblePartys(partyIds);
 

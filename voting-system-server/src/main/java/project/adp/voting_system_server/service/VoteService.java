@@ -1,6 +1,8 @@
 package project.adp.voting_system_server.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,7 @@ public class VoteService {
 
     // Persist cached votes to the database
     @Transactional
+    @CacheEvict(value = "votes", allEntries = true) // Invalidate cache after flushing
     public synchronized void flushVotesToDatabase() {
         if (!voteCache.isEmpty()) {
             // Group votes by electionId for consistent batching
@@ -58,23 +61,33 @@ public class VoteService {
 
     // Scheduled method to flush votes every 15 minutes
     @Scheduled(fixedRate = 900000) // 15 minutes in milliseconds
+    @CacheEvict(value = "votes", allEntries = true) // Invalidate the cache before flushing
     public void autoFlushVotes() {
         System.out.println("Scheduled flush triggered.");
         flushVotesToDatabase();
     }
 
     // Fetch all votes from the database
+    @Cacheable(value = "votes", key = "'allVotes'") // Cache the result with a static key
     public List<Vote> getAllVotes() {
         return voteRepository.findAll();
     }
 
     // Fetch votes by election ID and party ID
+    @Cacheable(value = "votes", key = "#electionId + '_' + #partyId") // Cache by election and party
     public List<Vote> getVotesByElectionAndParty(Long electionId, String partyId) {
         return voteRepository.findAllByElectionIdAndPartyId(electionId, partyId);
     }
 
     // Count votes for a specific party in an election
+    @Cacheable(value = "voteCounts", key = "#electionId + '_' + #partyId") // Cache vote count
     public Long countVotesForElectionAndParty(Long electionId, String partyId) {
         return voteRepository.countVotesByElectionIdAndPartyId(electionId, partyId);
+    }
+
+    // Fetch votes by voter ID (if needed, you can add this method)
+    @Cacheable(value = "votesByVoter", key = "#voterId") // Cache votes by voter
+    public List<Vote> getVotesByVoter(String voterId) {
+        return voteRepository.findAllByVoterId(voterId);
     }
 }

@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import project.adp.voting_system_server.model.Party;
 
 @Repository
-public interface PartyRepository extends JpaRepository<Party, Long> {
+public interface PartyRepository extends JpaRepository<Party, String> {
     List<Party> findByState(String state);
 }

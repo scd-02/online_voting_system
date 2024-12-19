@@ -1,60 +1,45 @@
-// CandidateForm.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import StateDropdown from './StateDropdown';
+import PropTypes from 'prop-types';
 
-const CandidateForm = ({ candidate, onClose, onSave }) => {
-    const [aadhaarNumber, setAadhaarNumber] = useState(candidate ? candidate.aadhaarNumber : '');
-    const [partyId, setPartyId] = useState(candidate ? candidate.party.id : '');
+axios.defaults.withCredentials = true;
+
+const CandidateForm = ({ candidate, parties, onClose, onSave }) => {
+    const [aadhaarNumber] = useState(candidate ? candidate.aadhaarNumber : '');
+    const [partyId, setPartyId] = useState(candidate?.party?.id?.toString() || '');
     const [error, setError] = useState('');
 
-    const [parties, setParties] = useState([]);
-
-    useEffect(() => {
-        // Fetch all parties to populate the dropdown
-        axios.get('/api/parties/getAllParties')
-            .then(response => {
-                setParties(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching parties:', error);
-            });
-    }, []);
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!aadhaarNumber || !partyId) {
             setError('All fields are required!');
             return;
         }
 
+        const API_URL = process.env.NEXT_PUBLIC_API_URL;
         const candidateData = {
             aadhaarNumber,
-            party: { id: partyId }
+            party: { id: parseInt(partyId, 10) },
         };
 
-        if (candidate) {
-            // Edit existing candidate
-            axios.put(`/api/candidates/${candidate.id}`, candidateData)
-                .then(() => {
-                    onSave();
-                    onClose();
-                })
-                .catch(err => {
-                    console.error(err);
-                    setError('Error saving candidate data!');
-                });
-        } else {
-            // Add new candidate
-            axios.post('/api/candidates', candidateData)
-                .then(() => {
-                    onSave();
-                    onClose();
-                })
-                .catch(err => {
-                    console.error(err);
-                    setError('Error adding candidate!');
-                });
+        try {
+            let response;
+            if (candidate) {
+                // Edit existing candidate
+                const updatedCandidateData = {
+                    id: candidate.id, // Ensure the ID is sent
+                    ...candidateData,
+                };
+                response = await axios.put(`${API_URL}/candidates/${candidate.id}`, updatedCandidateData);
+            } else {
+                // Add new candidate
+                response = await axios.post(`${API_URL}/candidates/create`, candidateData);
+            }
+            onSave(response.data, !candidate);
+            onClose();
+        } catch (err) {
+            console.error(err);
+            setError('Error saving candidate data!');
         }
     };
 
@@ -64,15 +49,16 @@ const CandidateForm = ({ candidate, onClose, onSave }) => {
             {error && <div className="text-red-500 mb-4">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                    <input
-                        type="text"
-                        className="w-full p-2 border border-gray-300 rounded"
-                        placeholder="Aadhaar Number"
-                        value={aadhaarNumber}
-                        onChange={(e) => setAadhaarNumber(e.target.value)}
-                    />
+                    <p className="w-full p-2 border border-gray-300 rounded bg-gray-50">
+                        Aadhaar Number: <strong>{aadhaarNumber}</strong>
+                    </p>
                 </div>
                 <div className="mb-4">
+                    {candidate && candidate.party && (
+                        <p className="mb-2">
+                            Current Party: <strong>{candidate.party.name}</strong>
+                        </p>
+                    )}
                     <select
                         className="w-full p-2 border border-gray-300 rounded"
                         value={partyId}
@@ -80,23 +66,37 @@ const CandidateForm = ({ candidate, onClose, onSave }) => {
                     >
                         <option value="">Select Party</option>
                         {parties.map((party) => (
-                            <option key={party.id} value={party.id}>
+                            <option key={party.id} value={party.id.toString()}>
                                 {party.name}
                             </option>
                         ))}
                     </select>
                 </div>
                 <div className="flex justify-between">
-                    <button type="button" onClick={onClose} className="bg-gray-500 text-white px-4 py-2 rounded">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="bg-gray-500 text-white px-4 py-2 rounded"
+                    >
                         Cancel
                     </button>
-                    <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+                    <button
+                        type="submit"
+                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                    >
                         {candidate ? 'Update Candidate' : 'Add Candidate'}
                     </button>
                 </div>
             </form>
         </div>
     );
+};
+
+CandidateForm.propTypes = {
+    candidate: PropTypes.object,
+    parties: PropTypes.array.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onSave: PropTypes.func.isRequired,
 };
 
 export default CandidateForm;
