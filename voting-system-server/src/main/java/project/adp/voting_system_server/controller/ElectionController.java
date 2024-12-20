@@ -10,6 +10,7 @@ import project.adp.voting_system_server.service.ElectionService;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Arrays;
 
 @RestController
 @RequestMapping("/election")
@@ -49,6 +50,19 @@ public class ElectionController {
                 .map(e -> ElectionDTO.fromEntityWithVotes(e, voteRepository))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(elections);
+    }
+
+    // Get elections by IDs
+    @GetMapping("/getElectionsByIds")
+    public ResponseEntity<List<ElectionDTO>> getElectionsByIds(@RequestParam String ids) {
+        List<Long> electionIds = Arrays.stream(ids.split(","))
+                                   .map(Long::parseLong)
+                                   .collect(Collectors.toList());
+        List<Election> elections = electionService.getElectionsByIds(electionIds);
+        List<ElectionDTO> electionDTOs = elections.stream()
+                                            .map(e -> ElectionDTO.fromEntityWithVotes(e, voteRepository))
+                                            .collect(Collectors.toList());
+        return ResponseEntity.ok(electionDTOs);
     }
 
     // Create election

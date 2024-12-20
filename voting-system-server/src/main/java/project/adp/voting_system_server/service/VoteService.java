@@ -5,15 +5,14 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import jakarta.annotation.PreDestroy;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import project.adp.voting_system_server.model.Vote;
 import project.adp.voting_system_server.repository.VoteRepository;
 
+import jakarta.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,13 +26,37 @@ public class VoteService {
     private final int BATCH_SIZE = 10; // Batch size threshold for saving votes
 
     // Save a vote to the cache
-    public synchronized void saveVote(Vote vote) {
+    public synchronized String saveVote(Vote vote) {
+        // Check if a vote already exists for the same voterId and electionId
+        if (voteExists(vote.getVoterId(), vote.getElectionId())) {
+            return "Vote already exists for this user in this election.";
+        }
+
         voteCache.add(vote); // Add vote to cache
 
         // If the cache size reaches the batch size, persist the votes to the database
         if (voteCache.size() >= BATCH_SIZE) {
             flushVotesToDatabase();
         }
+
+        return "Vote cached successfully. It will be saved to the database in a batch.";
+    }
+
+    public boolean voteExists(String voterId, Long electionId) {
+        if (voterId == null || electionId == null) {
+            return false;
+        }
+
+        // Check if the vote exists in the cache
+        boolean existsInCache = voteCache.stream()
+                .anyMatch(vote -> voterId.equals(vote.getVoterId()) && electionId.equals(vote.getElectionId()));
+        if (existsInCache) {
+            return true;
+        }
+
+        // Check if the vote exists in the database
+        Optional<Vote> existingVote = voteRepository.findByVoterIdAndElectionId(voterId, electionId);
+        return existingVote.isPresent();
     }
 
     // Persist cached votes to the database
@@ -41,14 +64,7 @@ public class VoteService {
     @CacheEvict(value = "votes", allEntries = true) // Invalidate cache after flushing
     public synchronized void flushVotesToDatabase() {
         if (!voteCache.isEmpty()) {
-            // Group votes by electionId for consistent batching
-            Map<Long, List<Vote>> groupedVotes = voteCache.stream()
-                    .collect(Collectors.groupingBy(Vote::getElectionId));
-
-            // Persist each group to the database
-            groupedVotes.values().forEach(voteRepository::saveAll);
-
-            // Clear the cache after saving
+            voteRepository.saveAll(voteCache);
             voteCache.clear();
         }
     }
@@ -89,5 +105,31 @@ public class VoteService {
     @Cacheable(value = "votesByVoter", key = "#voterId") // Cache votes by voter
     public List<Vote> getVotesByVoter(String voterId) {
         return voteRepository.findAllByVoterId(voterId);
+    }
+
+    // Get votes by voterId from both cache and database
+    public List<Vote> getVotesByVoterId(String voterId) {
+        // Get votes from cache
+        List<Vote> votesFromCache = voteCache.stream()
+                .filter(vote -> voterId.equals(vote.getVoterId()))
+                .collect(Collectors.toList());
+
+        // Get votes from database
+        List<Vote> votesFromDatabase = voteRepository.findByVoterId(voterId);
+
+        // Combine both lists
+        List<Vote> allVotes = new ArrayList<>(votesFromDatabase);
+        allVotes.addAll(votesFromCache);
+
+        return allVotes;
+    }
+
+    @Transactional
+    public void deleteVotesByElectionId(Long id) {
+        // Delete votes from cache
+        voteCache.removeIf(vote -> id.equals(vote.getElectionId()));
+
+        // Delete votes from database
+        voteRepository.deleteByElectionId(id);
     }
 }

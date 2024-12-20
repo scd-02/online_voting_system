@@ -8,6 +8,8 @@ import PartyForm from "@/components/shared/PartyForm";
 import ElectionForm from "@/components/shared/ElectionForm";
 import AdminForm from "@/components/shared/AdminForm";
 
+axios.defaults.withCredentials = true;
+
 const AdminPage = () => {
     const [candidates, setCandidates] = useState([]);
     const [parties, setParties] = useState([]);
@@ -26,8 +28,6 @@ const AdminPage = () => {
 
     const fetchData = async () => {
         try {
-            axios.defaults.withCredentials = true;
-
             // Fetch data for all columns
             const [candidateRes, partyRes, electionRes] = await Promise.all([
                 axios.get(`${API_URL}/candidate/getAllCandidates`),

@@ -3,22 +3,23 @@
 import { Sidebar } from "@/components/shared/SideBar";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import ElectionTileView from "@/components/shared/EledtionTileView";
+import ElectionTileView from "@/components/shared/ElectionTileView";
+
+// Set axios to send cookies with requests
+axios.defaults.withCredentials = true;
 
 const UserDetailPage = () => {
   const [userData, setUserData] = useState(null);
   const [profileData, setProfileData] = useState(null); // New state for profile data
   const [isLoading, setIsLoading] = useState(true);
   const [aadhaar, setAadhaar] = useState(null); // State for Aadhaar number
+  const [eligibleElections, setEligibleElections] = useState([]); // <-- Add this line
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
         const API_URL = process.env.NEXT_PUBLIC_API_URL;
         setIsLoading(true);
-
-        // Set axios to send cookies with requests
-        axios.defaults.withCredentials = true;
 
         // Fetch profile data (for logged-in user)
         const profileResponse = await axios.get(`${API_URL}/auth/profile`);
@@ -50,7 +51,22 @@ const UserDetailPage = () => {
 
           // First request: Fetch user data by Aadhaar number
           const userResponse = await axios.get(`${API_URL}/users/${aadhaar}`);
+          console.log(userResponse.data)
           setUserData(userResponse.data); // Assign fetched user data to state
+
+          // Fetch elections the user is eligible for
+          if (userResponse.data.electionList && userResponse.data.electionList.length > 0) {
+            // Assuming electionList contains election IDs as strings
+            const electionIds = userResponse.data.electionList.join(',');
+            const electionsResponse = await axios.get(`${API_URL}/election/getElectionsByIds`, {
+              params: { ids: electionIds },
+            });
+            console.log(electionsResponse.data)
+            setEligibleElections(electionsResponse.data); // Set eligible elections
+          } else {
+            setEligibleElections([]); // No eligible elections
+          }
+
         } catch (error) {
           console.error("Failed to fetch user data:", error);
         } finally {
@@ -91,7 +107,10 @@ const UserDetailPage = () => {
   return (
     <div className="flex min-h-full w-full bg-background">
       <Sidebar user={userData} />
-      <ElectionTileView />
+      <ElectionTileView
+        eligibleElections={eligibleElections}
+        voterId={aadhaar}
+      />
     </div>
   );
 };

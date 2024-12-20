@@ -25,6 +25,11 @@ public class Vote {
     @Column(name = "time_of_vote", nullable = false)
     private LocalDateTime timeOfVote;
 
+    @PrePersist
+    protected void onCreate() {
+        this.timeOfVote = LocalDateTime.now();
+    }
+
     // Getters and Setters
 
     public Long getId() {

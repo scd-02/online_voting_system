@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";  // Import js-cookie to manage cookies
 
+axios.defaults.withCredentials = true;
+
 export default function OTPVerification() {
     const [otp, setOtp] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);

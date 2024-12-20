@@ -25,6 +25,9 @@ public class ElectionService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private VoteService voteService;
+
     public List<Election> getAllElections() {
         return electionRepository.findAll();
     }
@@ -35,6 +38,10 @@ public class ElectionService {
 
     public List<Election> getElectionsByRegion(String region) {
         return electionRepository.findByState(region);
+    }
+
+    public List<Election> getElectionsByIds(List<Long> ids) {
+        return electionRepository.findAllById(ids);
     }
 
     @Transactional
@@ -64,6 +71,7 @@ public class ElectionService {
 
     public void deleteElection(Long id) {
         electionRepository.findById(id).ifPresent(this::removeElectionFromEligibleUser);
+        voteService.deleteVotesByElectionId(id);
         electionRepository.deleteById(id);
     }
 
@@ -90,12 +98,12 @@ public class ElectionService {
         return electionRepository.findById(id).map(election -> {
             election.setActive(status);
             removeElectionFromEligibleUser(election);
+            voteService.flushVotesToDatabase();
             return electionRepository.save(election);
         }).orElseThrow(() -> new RuntimeException("Election not found with id " + id));
     }
 
     public void removeElectionFromEligibleUser(Election election) {
-        System.out.println("-----------------------------------");
         List<User> usersInRegion;
         if (election.getState().equalsIgnoreCase("India")) {
             usersInRegion = userRepository.findAll();
