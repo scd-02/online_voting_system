@@ -21,6 +21,12 @@ const AdminForm = ({ onClose, onSave }) => {
     };
 
     const handleAddAdmin = async () => {
+        // Check if Aadhaar number length is 12
+        if (newAdmin.length !== 12) {
+            alert('Aadhaar number must be exactly 12 characters long!');
+            return;
+        }
+
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL;
             const response = await axios.post(`${API_URL}/admin/create`, { userId: newAdmin });
@@ -41,16 +47,25 @@ const AdminForm = ({ onClose, onSave }) => {
         }
     };
 
+    const handleAdminChange = (e) => {
+        const value = e.target.value;
+        // Restrict the value to a maximum length of 12 characters
+        if (value.length <= 12) {
+            setNewAdmin(value);
+        }
+    };
+
     return (
         <div className="p-6 bg-white rounded shadow-md">
             <h2 className="text-xl mb-4">Manage Admins</h2>
             <div className="mb-4">
                 <input
-                    type="email"
+                    type="text"
                     placeholder="New Admin Aadhaar Number"
                     value={newAdmin}
-                    onChange={(e) => setNewAdmin(e.target.value)}
+                    onChange={handleAdminChange}
                     className="w-full p-2 border border-gray-300 rounded"
+                    maxLength={12}  // Max length to allow only 12 characters
                 />
                 <button
                     onClick={handleAddAdmin}
