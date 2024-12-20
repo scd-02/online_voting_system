@@ -52,16 +52,17 @@ const AdminPage = () => {
 
     // Handlers for saving data without re-fetching
     const handleCandidateSave = (updatedCandidate, isNew) => {
-        setCandidates(prevCandidates => {
+        setCandidates((prevCandidates) => {
             if (isNew) {
                 return [...prevCandidates, updatedCandidate];
             } else {
-                return prevCandidates.map(candidate =>
+                return prevCandidates.map((candidate) =>
                     candidate.aadhaarNumber === updatedCandidate.aadhaarNumber ? updatedCandidate : candidate
                 );
             }
         });
     };
+
 
     const handlePartySave = (updatedParty, isNew, newCandidate) => {
         setParties(prevParties => {
@@ -111,32 +112,41 @@ const AdminPage = () => {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-            await axios.delete(`${API_URL}/${type}/${id}`);
+            try {
+                await axios.delete(`${API_URL}/${type}/${id}`);
 
-            // Update the state without re-fetching
-            if (type === 'candidate') {
-                setCandidates((prevCandidates) =>
-                    prevCandidates.filter((candidate) => candidate.aadhaarNumber !== id)
-                );
-            } else if (type === 'party') {
-                // Find the deleted party to identify its leader
-                const deletedParty = parties.find((party) => party.name === id);
-                setParties((prevParties) =>
-                    prevParties.filter((party) => party.name !== id)
-                );
-
-                if (deletedParty && deletedParty.leaderAadhaarNumber) {
+                // Update the state without re-fetching
+                if (type === 'candidate') {
                     setCandidates((prevCandidates) =>
-                        prevCandidates.filter(
-                            (candidate) => candidate.aadhaarNumber !== deletedParty.leaderAadhaarNumber
-                        )
+                        prevCandidates.filter((candidate) => candidate.aadhaarNumber !== id)
+                    );
+                } else if (type === 'party') {
+                    // Find the deleted party to identify its leader
+                    const deletedParty = parties.find((party) => party.name === id);
+                    setParties((prevParties) =>
+                        prevParties.filter((party) => party.name !== id)
+                    );
+
+                    if (deletedParty && deletedParty.leaderAadhaarNumber) {
+                        setCandidates((prevCandidates) =>
+                            prevCandidates.filter(
+                                (candidate) => candidate.aadhaarNumber !== deletedParty.leaderAadhaarNumber
+                            )
+                        );
+                    }
+                } else if (type === 'election') {
+                    setElections((prevElections) =>
+                        prevElections.filter((election) => election.name !== id)
                     );
                 }
-            } else if (type === 'election') {
-                setElections((prevElections) =>
-                    prevElections.filter((election) => election.name !== id)
-                );
+            } catch (error) {
+                if (error.response && error.response.data) {
+                    alert(error.response.data);
+                } else {
+                    console.error(`Error deleting ${type}:`, error);
+                }
             }
+
         } catch (error) {
             console.error(`Error deleting ${type}:`, error);
         }
@@ -193,7 +203,7 @@ const AdminPage = () => {
                 <div className="flex-grow w-full bg-white p-4 rounded-lg shadow overflow-y-auto">
                     <ul>
                         {validItems.map(item => (
-                            <li key={item.aadhaarNumber || item.id || item.name} className="mb-2 border-b pb-2">
+                            <li key={type === "candidates" ? item.aadhaarNumber : type === "parties" ? item.name : item.id} className="mb-2 border-b pb-2">
                                 {type === "candidates" && (
                                     <div>
                                         <p><strong>Aadhaar Number:</strong> {item.aadhaarNumber}</p>

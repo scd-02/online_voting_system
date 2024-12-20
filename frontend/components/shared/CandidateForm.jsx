@@ -5,8 +5,13 @@ import PropTypes from 'prop-types';
 axios.defaults.withCredentials = true;
 
 const CandidateForm = ({ candidate, parties, onClose, onSave }) => {
-    const [aadhaarNumber] = useState(candidate ? candidate.aadhaarNumber : '');
-    const [partyId, setPartyId] = useState(candidate?.party?.id?.toString() || '');
+
+    console.log("candidate", candidate)
+    console.log("parties", parties)
+
+    // If there's an existing candidate, use their aadhaarNumber; otherwise, allow the user to input one.
+    const [aadhaarNumber, setAadhaarNumber] = useState(candidate ? candidate.aadhaarNumber : '');
+    const [partyId, setPartyId] = useState(candidate?.partyName || '');
     const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
@@ -19,27 +24,31 @@ const CandidateForm = ({ candidate, parties, onClose, onSave }) => {
         const API_URL = process.env.NEXT_PUBLIC_API_URL;
         const candidateData = {
             aadhaarNumber,
-            party: { id: parseInt(partyId, 10) },
+            party: { name: partyId }
         };
 
         try {
             let response;
             if (candidate) {
                 // Edit existing candidate
-                const updatedCandidateData = {
-                    id: candidate.id, // Ensure the ID is sent
-                    ...candidateData,
-                };
-                response = await axios.put(`${API_URL}/candidates/${candidate.id}`, updatedCandidateData);
+                response = await axios.put(`${API_URL}/candidate/${candidate.aadhaarNumber}`, null, {
+                    params: {
+                        partyName: partyId
+                    },
+                });
             } else {
                 // Add new candidate
-                response = await axios.post(`${API_URL}/candidates/create`, candidateData);
+                response = await axios.post(`${API_URL}/candidate/create`, candidateData);
             }
             onSave(response.data, !candidate);
             onClose();
         } catch (err) {
             console.error(err);
-            setError('Error saving candidate data!');
+            if (err.response && err.response.data) {
+                setError(err.response.data);
+            } else {
+                setError('Error saving candidate data!');
+            }
         }
     };
 
@@ -48,11 +57,25 @@ const CandidateForm = ({ candidate, parties, onClose, onSave }) => {
             <h2 className="text-xl mb-4">{candidate ? 'Edit Candidate' : 'Add Candidate'}</h2>
             {error && <div className="text-red-500 mb-4">{error}</div>}
             <form onSubmit={handleSubmit}>
+                {/* Aadhaar Number Field */}
                 <div className="mb-4">
-                    <p className="w-full p-2 border border-gray-300 rounded bg-gray-50">
-                        Aadhaar Number: <strong>{aadhaarNumber}</strong>
-                    </p>
+                    <label className="block mb-2">Aadhaar Number</label>
+                    {candidate ? (
+                        <p className="w-full p-2 border border-gray-300 rounded bg-gray-50">
+                            <strong>{aadhaarNumber}</strong>
+                        </p>
+                    ) : (
+                        <input
+                            type="text"
+                            className="w-full p-2 border border-gray-300 rounded"
+                            value={aadhaarNumber}
+                            onChange={(e) => setAadhaarNumber(e.target.value)}
+                            placeholder="Enter Aadhaar Number"
+                        />
+                    )}
                 </div>
+
+                {/* Party Selection Field */}
                 <div className="mb-4">
                     {candidate && candidate.party && (
                         <p className="mb-2">
@@ -66,12 +89,14 @@ const CandidateForm = ({ candidate, parties, onClose, onSave }) => {
                     >
                         <option value="">Select Party</option>
                         {parties.map((party) => (
-                            <option key={party.id} value={party.id.toString()}>
+                            <option key={party.name} value={party.name}>
                                 {party.name}
                             </option>
                         ))}
                     </select>
                 </div>
+
+                {/* Action Buttons */}
                 <div className="flex justify-between">
                     <button
                         type="button"

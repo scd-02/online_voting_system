@@ -1,8 +1,11 @@
 package project.adp.voting_system_server.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.persistence.EntityNotFoundException;
 import project.adp.voting_system_server.dto.CandidateDTO;
 import project.adp.voting_system_server.model.Candidate;
 import project.adp.voting_system_server.service.CandidateService;
@@ -25,6 +28,22 @@ public class CandidateController {
                 .collect(Collectors.toList());
     }
 
+    @PutMapping("/{aadhaarNumber}")
+    public ResponseEntity<String> updateCandidate(
+            @PathVariable String aadhaarNumber,
+            @RequestParam String partyName) {
+        try {
+            candidateService.updateCandidate(aadhaarNumber, partyName);
+            return ResponseEntity.ok("Candidate updated successfully.");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while updating the candidate.");
+        }
+    }
+
     @GetMapping("/{aadhaarNumber}")
     public ResponseEntity<Candidate> getCandidateByAadhaarNumber(@PathVariable String aadhaarNumber) {
         return candidateService.getCandidateByAadhaarNumber(aadhaarNumber)
@@ -33,14 +52,28 @@ public class CandidateController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Candidate> createCandidate(@RequestBody Candidate candidate) {
+    public ResponseEntity<String> createCandidate(@RequestBody Candidate candidate) {
+        if (!candidateService.partyExists(candidate.getParty())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("The specified party does not exist. Please create the party first.");
+        }
         Candidate savedCandidate = candidateService.saveCandidate(candidate);
-        return ResponseEntity.ok(savedCandidate);
+        return ResponseEntity.ok(savedCandidate.toString());
     }
 
     @DeleteMapping("/{aadhaarNumber}")
-    public ResponseEntity<Void> deleteCandidate(@PathVariable String aadhaarNumber) {
-        candidateService.deleteCandidate(aadhaarNumber);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<String> deleteCandidate(@PathVariable String aadhaarNumber) {
+        try {
+            candidateService.deleteCandidate(aadhaarNumber);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while deleting the candidate.");
+        }
     }
 }
