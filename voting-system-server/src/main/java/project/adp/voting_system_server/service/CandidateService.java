@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
+import project.adp.voting_system_server.dto.CandidateDTO;
 import project.adp.voting_system_server.model.Candidate;
 import project.adp.voting_system_server.model.Party;
 import project.adp.voting_system_server.repository.CandidateRepository;
@@ -49,7 +50,7 @@ public class CandidateService {
         candidateRepository.delete(candidate);
     }
 
-    public void updateCandidate(String aadhaarNumber, String partyName) {
+    public CandidateDTO updateCandidate(String aadhaarNumber, String partyName) {
         Optional<Candidate> candidateOpt = candidateRepository.findById(aadhaarNumber);
         if (!candidateOpt.isPresent()) {
             throw new EntityNotFoundException("Candidate not found with Aadhaar number: " + aadhaarNumber);
@@ -69,6 +70,11 @@ public class CandidateService {
         Party party = partyOpt.get();
         candidate.setParty(party);
         candidateRepository.save(candidate);
+
+        CandidateDTO candidateDTO = new CandidateDTO();
+        candidateDTO.setAadhaarNumber(candidate.getAadhaarNumber());
+        candidateDTO.setPartyName(party.getName());
+        return candidateDTO;
     }
 
     public boolean partyExists(Party party) {

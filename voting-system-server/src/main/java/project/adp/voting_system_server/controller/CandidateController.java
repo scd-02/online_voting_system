@@ -29,14 +29,14 @@ public class CandidateController {
     }
 
     @PutMapping("/{aadhaarNumber}")
-    public ResponseEntity<String> updateCandidate(
-            @PathVariable String aadhaarNumber,
-            @RequestParam String partyName) {
+    public ResponseEntity<Object> updateCandidate(@PathVariable String aadhaarNumber, @RequestParam String partyName) {
         try {
-            candidateService.updateCandidate(aadhaarNumber, partyName);
-            return ResponseEntity.ok("Candidate updated successfully.");
+            CandidateDTO updatedCandidate = candidateService.updateCandidate(aadhaarNumber, partyName);
+            return ResponseEntity.ok(updatedCandidate);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -52,17 +52,23 @@ public class CandidateController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> createCandidate(@RequestBody Candidate candidate) {
+    public ResponseEntity<Object> createCandidate(@RequestBody Candidate candidate) {
         if (!candidateService.partyExists(candidate.getParty())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("The specified party does not exist. Please create the party first.");
         }
-        Candidate savedCandidate = candidateService.saveCandidate(candidate);
-        return ResponseEntity.ok(savedCandidate.toString());
+        try {
+            Candidate savedCandidate = candidateService.saveCandidate(candidate);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new CandidateDTO(savedCandidate));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while creating the candidate.");
+        }
     }
 
     @DeleteMapping("/{aadhaarNumber}")
-    public ResponseEntity<String> deleteCandidate(@PathVariable String aadhaarNumber) {
+    public ResponseEntity<Object> deleteCandidate(@PathVariable String aadhaarNumber) {
         try {
             candidateService.deleteCandidate(aadhaarNumber);
             return ResponseEntity.noContent().build();

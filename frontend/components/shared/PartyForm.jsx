@@ -1,4 +1,3 @@
-// PartyForm.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import StateDropdown from '@/components/shared/StateDropdown';
@@ -7,15 +6,21 @@ axios.defaults.withCredentials = true;
 
 const PartyForm = ({ party, candidates, onClose, onSave }) => {
 
-    console.log("party", party)
-    console.log("candidates", candidates)
-
     const [name, setName] = useState(party ? party.name : '');
     const [agenda, setAgenda] = useState(party ? party.agenda : '');
     const [leaderAadhaar, setLeaderAadhaar] = useState(party && party.leaderAadhaarNumber ? party.leaderAadhaarNumber : '');
     const [stateValue, setStateValue] = useState(party ? party.state : '');
     const [error, setError] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false); // New state to handle submission
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Handle Aadhaar number input for leader
+    const handleLeaderAadhaarChange = (e) => {
+        const value = e.target.value;
+        // Restrict input to 12 characters max and only allow numbers
+        if (value.length <= 12 && /^\d*$/.test(value)) {
+            setLeaderAadhaar(value);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -28,7 +33,13 @@ const PartyForm = ({ party, candidates, onClose, onSave }) => {
             return;
         }
 
-        setIsSubmitting(true); // Set submitting state
+        // Check if Aadhaar number is exactly 12 characters long
+        if (leaderAadhaar && leaderAadhaar.length !== 12) {
+            setError('Leader Aadhaar number must be exactly 12 characters long!');
+            return;
+        }
+
+        setIsSubmitting(true);
 
         const API_URL = process.env.NEXT_PUBLIC_API_URL;
         const partyData = {
@@ -111,7 +122,8 @@ const PartyForm = ({ party, candidates, onClose, onSave }) => {
                             className="w-full p-2 border border-gray-300 rounded"
                             placeholder="Leader Aadhaar Number"
                             value={leaderAadhaar}
-                            onChange={(e) => setLeaderAadhaar(e.target.value)}
+                            onChange={handleLeaderAadhaarChange} // Apply the Aadhaar change handler
+                            maxLength={12} // Enforces 12 characters max
                         />
                     </div>
                 )}
@@ -165,7 +177,6 @@ const PartyForm = ({ party, candidates, onClose, onSave }) => {
             </form>
         </div>
     );
-
 };
 
 export default PartyForm;

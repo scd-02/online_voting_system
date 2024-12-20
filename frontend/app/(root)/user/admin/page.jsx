@@ -56,9 +56,7 @@ const AdminPage = () => {
             if (isNew) {
                 return [...prevCandidates, updatedCandidate];
             } else {
-                return prevCandidates.map((candidate) =>
-                    candidate.aadhaarNumber === updatedCandidate.aadhaarNumber ? updatedCandidate : candidate
-                );
+                return prevCandidates.map((candidate) => candidate.aadhaarNumber === updatedCandidate.aadhaarNumber ? updatedCandidate : candidate);
             }
         });
     };
@@ -130,7 +128,7 @@ const AdminPage = () => {
                     if (deletedParty && deletedParty.leaderAadhaarNumber) {
                         setCandidates((prevCandidates) =>
                             prevCandidates.filter(
-                                (candidate) => candidate.aadhaarNumber !== deletedParty.leaderAadhaarNumber
+                                (candidate) => candidate.partyName !== deletedParty.name
                             )
                         );
                     }

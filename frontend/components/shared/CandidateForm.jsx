@@ -6,16 +6,22 @@ axios.defaults.withCredentials = true;
 
 const CandidateForm = ({ candidate, parties, onClose, onSave }) => {
 
-    console.log("candidate", candidate)
-    console.log("parties", parties)
+    // console.log("candidate", candidate)
+    // console.log("parties", parties)
 
-    // If there's an existing candidate, use their aadhaarNumber; otherwise, allow the user to input one.
     const [aadhaarNumber, setAadhaarNumber] = useState(candidate ? candidate.aadhaarNumber : '');
     const [partyId, setPartyId] = useState(candidate?.partyName || '');
     const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Check if Aadhaar number is exactly 12 characters long
+        if (aadhaarNumber.length !== 12) {
+            setError('Aadhaar number must be exactly 12 characters long!');
+            return;
+        }
+
         if (!aadhaarNumber || !partyId) {
             setError('All fields are required!');
             return;
@@ -52,6 +58,14 @@ const CandidateForm = ({ candidate, parties, onClose, onSave }) => {
         }
     };
 
+    const handleAadhaarChange = (e) => {
+        const value = e.target.value;
+        // Restrict input to 12 characters max and only allow numbers
+        if (value.length <= 12 && /^\d*$/.test(value)) {
+            setAadhaarNumber(value);
+        }
+    };
+
     return (
         <div className="p-6 bg-white rounded shadow-md">
             <h2 className="text-xl mb-4">{candidate ? 'Edit Candidate' : 'Add Candidate'}</h2>
@@ -69,8 +83,9 @@ const CandidateForm = ({ candidate, parties, onClose, onSave }) => {
                             type="text"
                             className="w-full p-2 border border-gray-300 rounded"
                             value={aadhaarNumber}
-                            onChange={(e) => setAadhaarNumber(e.target.value)}
+                            onChange={handleAadhaarChange}
                             placeholder="Enter Aadhaar Number"
+                            maxLength={12} // Ensures that the input is limited to 12 characters
                         />
                     )}
                 </div>
