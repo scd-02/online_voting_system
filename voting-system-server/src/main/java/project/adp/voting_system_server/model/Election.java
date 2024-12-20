@@ -19,8 +19,11 @@ public class Election {
 
     @ElementCollection
     @CollectionTable(name = "election_eligible_partys", joinColumns = @JoinColumn(name = "election_id"))
-    @Column(name = "party_id")
+    @Column(name = "party_name")
     private List<String> eligiblePartys;
+
+    @Column(nullable = false, columnDefinition = "boolean default true") // Default value set to true
+    private boolean active; // New field to indicate if the election is active
 
     // Getters and Setters
 
@@ -54,5 +57,13 @@ public class Election {
 
     public void setEligiblePartys(List<String> eligiblePartys) {
         this.eligiblePartys = eligiblePartys;
+    }
+
+    public boolean isActive() {
+        return active; // Getter for active field
+    }
+
+    public void setActive(boolean active) {
+        this.active = active; // Setter for active field
     }
 }

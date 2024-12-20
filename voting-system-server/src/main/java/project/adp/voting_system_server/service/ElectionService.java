@@ -23,9 +23,6 @@ public class ElectionService {
     private ElectionRepository electionRepository;
 
     @Autowired
-    private PartyRepository partyRepository;
-
-    @Autowired
     private UserRepository userRepository;
 
     public List<Election> getAllElections() {
@@ -46,30 +43,12 @@ public class ElectionService {
         Election election = new Election();
         election.setName(electionPayload.getName());
         election.setState(electionPayload.getState());
-        election.setEligiblePartys(new ArrayList<>()); // Start with empty list
-        election = electionRepository.save(election);
-
-        // Step 2: Fetch all party IDs from the region
-        List<Party> partiesInRegion = partyRepository.findByState(electionPayload.getState());
-        List<String> partyIds = partiesInRegion.stream()
-                .map(party -> String.valueOf(party.getName()))
-                .collect(Collectors.toList());
-        election.setEligiblePartys(partyIds);
-
-        // Save updated election with parties
+        election.setEligiblePartys(electionPayload.getEligiblePartys());
+        election.setActive(electionPayload.isActive());
         election = electionRepository.save(election);
 
         // Step 3: Fetch all users from the region and associate them with the election
-        List<User> usersInRegion = userRepository.findByState(electionPayload.getState());
-        for (User user : usersInRegion) {
-            List<String> userElectionList = user.getElectionList();
-            if (userElectionList == null) {
-                userElectionList = new ArrayList<>();
-            }
-            userElectionList.add(String.valueOf(election.getId()));
-            user.setElectionList(userElectionList);
-            userRepository.save(user);
-        }
+        addElectionToEligibleUser(election);
 
         return election;
     }
@@ -85,5 +64,52 @@ public class ElectionService {
 
     public void deleteElection(Long id) {
         electionRepository.deleteById(id);
+    }
+
+    public void addElectionToEligibleUser(Election election) {
+        List<User> usersInRegion;
+        if (election.getState().equalsIgnoreCase("India")) {
+            usersInRegion = userRepository.findAll();
+        } else {
+            usersInRegion = userRepository.findByState(election.getState());
+        }
+
+        for (User user : usersInRegion) {
+            List<String> userElectionList = user.getElectionList();
+            if (userElectionList == null) {
+                userElectionList = new ArrayList<>();
+            }
+            userElectionList.add(String.valueOf(election.getId()));
+            user.setElectionList(userElectionList);
+            userRepository.save(user);
+        }
+    }
+
+    public Election setActiveStatus(Long id, boolean status) {
+        return electionRepository.findById(id).map(election -> {
+            election.setActive(status);
+            removeElectionToEligibleUser(election);
+            return electionRepository.save(election);
+        }).orElseThrow(() -> new RuntimeException("Election not found with id " + id));
+    }
+
+    public void removeElectionToEligibleUser(Election election) {
+        List<User> usersInRegion;
+        if (election.getState().equalsIgnoreCase("India")) {
+            usersInRegion = userRepository.findAll();
+        } else {
+            usersInRegion = userRepository.findByState(election.getState());
+        }
+
+        for (User user : usersInRegion) {
+            List<String> userElectionList = user.getElectionList();
+            if (userElectionList != null) {
+                userElectionList = userElectionList.stream()
+                        .filter(electionId -> !electionId.equals(String.valueOf(election.getId())))
+                        .collect(Collectors.toList());
+                user.setElectionList(userElectionList);
+                userRepository.save(user);
+            }
+        }
     }
 }

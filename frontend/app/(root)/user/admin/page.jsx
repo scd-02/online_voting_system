@@ -22,9 +22,10 @@ const AdminPage = () => {
     const [modalType, setModalType] = useState('');
     const [isNew, setIsNew] = useState(false);
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
     const fetchData = async () => {
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL;
             axios.defaults.withCredentials = true;
 
             // Fetch data for all columns
@@ -134,7 +135,7 @@ const AdminPage = () => {
                     }
                 } else if (type === 'election') {
                     setElections((prevElections) =>
-                        prevElections.filter((election) => election.name !== id)
+                        prevElections.filter((election) => election.id !== id)
                     );
                 }
             } catch (error) {
@@ -169,6 +170,29 @@ const AdminPage = () => {
         setIsModalOpen(true);
         setIsNew(false);
     };
+
+    const handleStopElection = async (id) => {
+        const confirmStop = window.confirm("Are you sure you want to stop this election?");
+        if (!confirmStop) return;
+
+        try {
+            await axios.post(`${API_URL}/election/${id}/status?active=false`);
+
+            // Update the election's status in the state
+            setElections((prevElections) =>
+                prevElections.map((election) =>
+                    election.id === id ? { ...election, active: false } : election
+                )
+            );
+        } catch (error) {
+            if (error.response && error.response.data) {
+                alert(error.response.data);
+            } else {
+                console.error("Error stopping election:", error);
+            }
+        }
+    };
+
 
     const renderColumn = (items, filter, setFilter, type) => {
         const filteredItems = items.filter(item => {
@@ -232,12 +256,9 @@ const AdminPage = () => {
                                             {item.eligiblePartys && item.eligiblePartys.length > 0 ? (
                                                 <ul>
                                                     {item.eligiblePartys.map(partyName => {
-                                                        const party = parties.find(
-                                                            p => p.name === partyName
-                                                        );
                                                         return (
                                                             <li key={partyName}>
-                                                                {party ? party.name : `Party Name ${partyName}`}
+                                                                {partyName}
                                                             </li>
                                                         );
                                                     })}
@@ -247,7 +268,12 @@ const AdminPage = () => {
                                             )}
                                         </div>
                                         <button onClick={() => handleEdit(item, type)} className="rounded px-4 py-1 mr-4 bg-blue-500 text-white">Edit</button>
-                                        <button onClick={() => handleDelete(item.name, type)} className="text-red-500 ml-2">Delete</button>
+                                        {!item.active ? (
+                                            <span className="rounded px-4 py-1 mr-14 bg-gray-400 text-white">Inactive</span>
+                                        ) : (
+                                            <button onClick={() => handleStopElection(item.id)} className="rounded px-4 py-1 mr-14 bg-yellow-600 text-white">Stop</button>
+                                        )}
+                                        <button onClick={() => handleDelete(item.id, type)} className="text-red-500 ml-10">Delete</button>
                                     </div>
                                 )}
                             </li>
