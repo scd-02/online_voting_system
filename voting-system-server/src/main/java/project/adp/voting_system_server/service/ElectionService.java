@@ -63,6 +63,7 @@ public class ElectionService {
     }
 
     public void deleteElection(Long id) {
+        electionRepository.findById(id).ifPresent(this::removeElectionFromEligibleUser);
         electionRepository.deleteById(id);
     }
 
@@ -88,12 +89,13 @@ public class ElectionService {
     public Election setActiveStatus(Long id, boolean status) {
         return electionRepository.findById(id).map(election -> {
             election.setActive(status);
-            removeElectionToEligibleUser(election);
+            removeElectionFromEligibleUser(election);
             return electionRepository.save(election);
         }).orElseThrow(() -> new RuntimeException("Election not found with id " + id));
     }
 
-    public void removeElectionToEligibleUser(Election election) {
+    public void removeElectionFromEligibleUser(Election election) {
+        System.out.println("-----------------------------------");
         List<User> usersInRegion;
         if (election.getState().equalsIgnoreCase("India")) {
             usersInRegion = userRepository.findAll();

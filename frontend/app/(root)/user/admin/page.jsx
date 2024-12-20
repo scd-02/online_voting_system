@@ -252,28 +252,28 @@ const AdminPage = () => {
                                         <strong>{item.name}</strong>
                                         <p>State: {item.state}</p>
                                         <div className="flex space-x-3 mb-3">
-                                            <p>Eligible Parties:</p>
-                                            {item.eligiblePartys && item.eligiblePartys.length > 0 ? (
-                                                <ul>
-                                                    {item.eligiblePartys.map(partyName => {
-                                                        return (
-                                                            <li key={partyName}>
-                                                                {partyName}
-                                                            </li>
-                                                        );
-                                                    })}
-                                                </ul>
-                                            ) : (
-                                                <p>No eligible parties.</p>
-                                            )}
+                                            <p>Parties: </p>
+                                            <ul>
+                                                {item.eligiblePartys.map(partyName => {
+                                                    return (
+                                                        <li key={partyName}>
+                                                            {partyName}:&ensp;{item.partyVotes[partyName]} vote{item.partyVotes[partyName] > 1 && "s"}
+                                                        </li>
+                                                    );
+                                                })}
+                                            </ul>
                                         </div>
-                                        <button onClick={() => handleEdit(item, type)} className="rounded px-4 py-1 mr-4 bg-blue-500 text-white">Edit</button>
-                                        {!item.active ? (
-                                            <span className="rounded px-4 py-1 mr-14 bg-gray-400 text-white">Inactive</span>
-                                        ) : (
-                                            <button onClick={() => handleStopElection(item.id)} className="rounded px-4 py-1 mr-14 bg-yellow-600 text-white">Stop</button>
+                                        {item.creationDate && (
+                                            <div className="text-xs text-gray-500 mb-3 text-right">
+                                                Created on: {new Date(item.creationDate).toLocaleString()}
+                                            </div>
                                         )}
-                                        <button onClick={() => handleDelete(item.id, type)} className="text-red-500 ml-10">Delete</button>
+                                        {!item.active ? (
+                                            <span className="rounded px-4 py-1 bg-gray-400 text-white">Inactive</span>
+                                        ) : (
+                                            <button onClick={() => handleStopElection(item.id)} className="rounded px-4 py-1 bg-yellow-600 text-white">Stop</button>
+                                        )}
+                                        <button onClick={() => handleDelete(item.id, type)} className="text-red-500 ml-7">Delete</button>
                                     </div>
                                 )}
                             </li>

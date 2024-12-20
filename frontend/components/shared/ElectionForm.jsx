@@ -5,16 +5,12 @@ import StateDropdown from './StateDropdown';
 axios.defaults.withCredentials = true;
 
 const ElectionForm = ({ election, parties, onClose, onSave }) => {
-    const [name, setName] = useState(election ? election.name : '');
-    const [state, setState] = useState(election ? election.state : '');
-    const [eligiblePartyIds, setEligiblePartyIds] = useState(new Set(election?.eligiblePartys || []));
-    // const [active, setActive] = useState(election ? election.active : true); // <-- Add "active" state
+    const [name, setName] = useState('');
+    const [state, setState] = useState('');
+    const [eligiblePartyIds, setEligiblePartyIds] = useState(new Set());
     const [filter, setFilter] = useState('');
     const [error, setError] = useState('');
     const [dropdownVisible, setDropdownVisible] = useState(false); // Toggle state for dropdown visibility
-
-    console.log("election", election);
-    console.log("parties", parties);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -24,7 +20,6 @@ const ElectionForm = ({ election, parties, onClose, onSave }) => {
         }
 
         const API_URL = process.env.NEXT_PUBLIC_API_URL;
-        // Include "active" in the payload
         const electionData = {
             name,
             state,
@@ -33,13 +28,8 @@ const ElectionForm = ({ election, parties, onClose, onSave }) => {
         };
 
         try {
-            let response;
-            if (election) {
-                response = await axios.put(`${API_URL}/election/${election.id}`, electionData);
-            } else {
-                response = await axios.post(`${API_URL}/election/create`, electionData);
-            }
-            onSave(response.data, !election);
+            const response = await axios.post(`${API_URL}/election/create`, electionData);
+            onSave(response.data, true);
             onClose();
         } catch (err) {
             console.error(err);
@@ -68,7 +58,7 @@ const ElectionForm = ({ election, parties, onClose, onSave }) => {
 
     return (
         <div className="p-6 bg-white rounded shadow-md">
-            <h2 className="text-xl mb-4">{election ? 'Edit Election' : 'Add Election'}</h2>
+            <h2 className="text-xl mb-4">Add Election</h2>
             {error && <div className="text-red-500 mb-4">{error}</div>}
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
@@ -77,19 +67,15 @@ const ElectionForm = ({ election, parties, onClose, onSave }) => {
                         className="w-full p-2 border border-gray-300 rounded"
                         placeholder="Election Name"
                         value={name}
-                        disabled={election}
                         onChange={(e) => setName(e.target.value)}
                     />
                 </div>
                 <div className="mb-4">
-                    {!state && <StateDropdown value={state} onChange={(e) => setState(e.target.value)} form="election" />}
-                    {state && <input
-                        type="text"
-                        className="w-full p-2 border border-gray-300 rounded"
-                        placeholder="Election Name"
+                    <StateDropdown
                         value={state}
-                        disabled
-                    />}
+                        onChange={(e) => setState(e.target.value)}
+                        form="election"
+                    />
                 </div>
                 <div className="mb-4">
                     <label className="block mb-2">Eligible Parties:</label>
@@ -156,7 +142,7 @@ const ElectionForm = ({ election, parties, onClose, onSave }) => {
                         Cancel
                     </button>
                     <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-                        {election ? 'Update Election' : 'Add Election'}
+                        Add Election
                     </button>
                 </div>
             </form>

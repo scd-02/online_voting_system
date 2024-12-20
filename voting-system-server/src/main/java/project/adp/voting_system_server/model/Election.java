@@ -1,6 +1,7 @@
 package project.adp.voting_system_server.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -24,6 +25,15 @@ public class Election {
 
     @Column(nullable = false, columnDefinition = "boolean default true") // Default value set to true
     private boolean active; // New field to indicate if the election is active
+
+    // New field for creation date
+    @Column(name = "creation_date", updatable = false)
+    private LocalDateTime creationDate;
+
+    @PrePersist
+    protected void onCreate() {
+        this.creationDate = LocalDateTime.now();
+    }
 
     // Getters and Setters
 
@@ -65,5 +75,13 @@ public class Election {
 
     public void setActive(boolean active) {
         this.active = active; // Setter for active field
+    }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
     }
 }
