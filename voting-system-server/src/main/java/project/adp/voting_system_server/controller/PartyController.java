@@ -64,7 +64,8 @@ public class PartyController {
             // If leader Aadhaar number is provided
             if (partyDTO.getLeaderAadhaarNumber() != null && !partyDTO.getLeaderAadhaarNumber().isEmpty()) {
                 // Check if candidate already exists
-                Optional<Candidate> existingCandidate = candidateService.getCandidateByAadhaarNumber(partyDTO.getLeaderAadhaarNumber());
+                Optional<Candidate> existingCandidate = candidateService
+                        .getCandidateByAadhaarNumber(partyDTO.getLeaderAadhaarNumber());
                 if (existingCandidate.isPresent()) {
                     return ResponseEntity.badRequest().body("Candidate with the given Aadhaar number already exists.");
                 }
@@ -98,12 +99,22 @@ public class PartyController {
             }
 
             Party existingParty = existingPartyOpt.get();
+
+            if (partyDTO.getState() != null && !partyDTO.getState().equals(existingParty.getState())) {
+                boolean partyInOngoingElection = partyService.partyInOngoingElection(name);
+                if (partyInOngoingElection) {
+                    return ResponseEntity.badRequest()
+                            .body("Cannot update party state while it is eligible in an ongoing election.");
+                }
+            }
+
             existingParty.setAgenda(partyDTO.getAgenda());
             existingParty.setState(partyDTO.getState());
 
             // If leader Aadhaar number is provided
             if (partyDTO.getLeaderAadhaarNumber() != null && !partyDTO.getLeaderAadhaarNumber().isEmpty()) {
-                Optional<Candidate> leaderOpt = candidateService.getCandidateByAadhaarNumber(partyDTO.getLeaderAadhaarNumber());
+                Optional<Candidate> leaderOpt = candidateService
+                        .getCandidateByAadhaarNumber(partyDTO.getLeaderAadhaarNumber());
                 if (leaderOpt.isPresent()) {
                     Candidate leader = leaderOpt.get();
                     existingParty.setLeader(leader);
@@ -121,16 +132,17 @@ public class PartyController {
         }
     }
 
-    // Set the leader of a party
-    @PutMapping("/{name}/setLeader")
-    public ResponseEntity<Party> setLeader(@PathVariable String name, @RequestParam String leaderAadhaarNumber) {
-        try {
-            Party updatedParty = partyService.setPartyLeader(name, leaderAadhaarNumber);
-            return ResponseEntity.ok(updatedParty);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
+    // // Set the leader of a party
+    // @PutMapping("/{name}/setLeader")
+    // public ResponseEntity<Party> setLeader(@PathVariable String name,
+    // @RequestParam String leaderAadhaarNumber) {
+    // try {
+    // Party updatedParty = partyService.setPartyLeader(name, leaderAadhaarNumber);
+    // return ResponseEntity.ok(updatedParty);
+    // } catch (RuntimeException e) {
+    // return ResponseEntity.badRequest().body(null);
+    // }
+    // }
 
     /**
      * Deletes a party by name.
@@ -149,7 +161,7 @@ public class PartyController {
             // Log the exception details for debugging purposes
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body("An error occurred while deleting the party.");
+                    .body("An error occurred while deleting the party.");
         }
     }
 }

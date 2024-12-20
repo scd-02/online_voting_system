@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import project.adp.voting_system_server.model.Candidate;
 import project.adp.voting_system_server.model.Party;
 import project.adp.voting_system_server.repository.CandidateRepository;
+import project.adp.voting_system_server.repository.ElectionRepository;
 import project.adp.voting_system_server.repository.PartyRepository;
 
 import java.util.List;
@@ -20,7 +21,10 @@ public class PartyService {
     private PartyRepository partyRepository;
 
     @Autowired
-    private CandidateRepository candidateRepository; // Ensure this repository exists
+    private CandidateRepository candidateRepository;
+
+    @Autowired
+    private ElectionRepository electionRepository;
 
     // Create or Update a party
     public Party saveParty(Party party) {
@@ -51,6 +55,9 @@ public class PartyService {
         List<Candidate> candidates = candidateRepository.findByParty(party);
         candidateRepository.deleteAll(candidates);
 
+        // Delete all record of party from any election
+        electionRepository.deleteByPartyName(name);
+
         // Delete the party
         partyRepository.delete(party);
     }
@@ -76,23 +83,27 @@ public class PartyService {
         }
     }
 
-    /**
-     * Deletes a party and its associated leader candidate.
-     *
-     * @param name The name of the party to delete.
-     */
-    @Transactional
-    public void deletePartyAndLeader(String name) {
-        Optional<Party> partyOpt = partyRepository.findById(name);
-        if (partyOpt.isPresent()) {
-            Party party = partyOpt.get();
-            Candidate leader = party.getLeader();
-            if (leader != null) {
-                candidateRepository.delete(leader);
-            }
-            partyRepository.delete(party);
-        } else {
-            throw new EntityNotFoundException("Party not found with name: " + name);
-        }
+    public boolean partyInOngoingElection(String partyName){
+        return electionRepository.existsPartyInElections(partyName);
     }
+
+    // /**
+    //  * Deletes a party and its associated leader candidate.
+    //  *
+    //  * @param name The name of the party to delete.
+    //  */
+    // @Transactional
+    // public void deletePartyAndLeader(String name) {
+    //     Optional<Party> partyOpt = partyRepository.findById(name);
+    //     if (partyOpt.isPresent()) {
+    //         Party party = partyOpt.get();
+    //         Candidate leader = party.getLeader();
+    //         if (leader != null) {
+    //             candidateRepository.delete(leader);
+    //         }
+    //         partyRepository.delete(party);
+    //     } else {
+    //         throw new EntityNotFoundException("Party not found with name: " + name);
+    //     }
+    // }
 }
