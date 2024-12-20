@@ -1,9 +1,9 @@
 // StateDropdown.js
 import React from 'react';
 
-const StateDropdown = ({ value, onChange }) => {
+const StateDropdown = ({ value, onChange, form }) => {
     const states = [
-        'India', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+        'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
         'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
         'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
         'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan',
@@ -12,6 +12,10 @@ const StateDropdown = ({ value, onChange }) => {
         'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Lakshadweep',
         'Puducherry'
     ];
+
+    if(form){
+        states.unshift('India');
+    }
 
     return (
         <select value={value} onChange={onChange} className="w-full p-2 border border-gray-300 rounded">
