@@ -2,10 +2,33 @@
 
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Mail, Phone, Calendar, Home, User } from "lucide-react";
+import axios from "axios";
+// import Cookies from 'js-cookie';
+
+// Set axios to send cookies with requests
+axios.defaults.withCredentials = true;
 
 export function Sidebar({ user }) {
+
+  const handleLogout = async () => {
+    if (!confirm("Are you sure you want to log out?")) {
+      return;
+    }
+
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      const response = await axios.post(`${API_URL}/auth/logout`, {}, { withCredentials: true });
+      // Clear cookies
+      // Cookies.remove('JSESSIONID', { path: '/', secure: true, sameSite: 'None' });
+      // Redirect to login
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
-    <div className="w-80 h-full">
+    <div className="w-80 h-full ">
       <div className="flex flex-col items-center space-y-4">
         {/* Avatar */}
         <Avatar className="h-24 w-24">
@@ -62,6 +85,12 @@ export function Sidebar({ user }) {
         </div>
 
       </div>
+      <button
+        onClick={handleLogout}
+        className="mt-6 mx-auto block bg-red-500 px-4 py-2 text-sm font-medium text-white rounded-lg shadow hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300 transition"
+      >
+        Logout
+      </button>
     </div>
   );
 }
