@@ -17,9 +17,10 @@ export function Sidebar({ user }) {
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const response = await axios.post(`${API_URL}/auth/logout`, {}, { withCredentials: true });
+      const response = await axios.post(`${API_URL}/auth/logout`);
       // Clear cookies
       // Cookies.remove('JSESSIONID', { path: '/', secure: true, sameSite: 'None' });
+      console.log(response)
       // Redirect to login
       window.location.href = "/login";
     } catch (error) {
