@@ -9,7 +9,6 @@ import axios from "axios";
 axios.defaults.withCredentials = true;
 
 export function Sidebar({ user, profileRole }) {
-
   const handleLogout = async () => {
     if (!confirm("Are you sure you want to log out?")) {
       return;
@@ -20,12 +19,16 @@ export function Sidebar({ user, profileRole }) {
       const response = await axios.post(`${API_URL}/auth/logout`);
       // Clear cookies
       // Cookies.remove('JSESSIONID', { path: '/', secure: true, sameSite: 'None' });
-      console.log(response)
+      console.log(response);
       // Redirect to login
       window.location.href = "/login";
     } catch (error) {
       console.error("Logout failed:", error);
     }
+  };
+
+  const handleAdmin = () => {
+    window.location.href = "/admin";
   };
 
   return (
@@ -66,10 +69,15 @@ export function Sidebar({ user, profileRole }) {
           <Home className="h-5 w-5 text-muted-foreground" />
           <div>
             <span className="text-sm">
-              Address:<br /> {user.addressLine1}, <br />{user.addressLine2}, <br />{user.city}, {user.state} - {user.pinCode}
+              Address:
+              <br /> {user.addressLine1}, <br />
+              {user.addressLine2}, <br />
+              {user.city}, {user.state} - {user.pinCode}
             </span>
             <br />
-            <span className="text-sm">Residence Type: {user.residenceType}</span>
+            <span className="text-sm">
+              Residence Type: {user.residenceType}
+            </span>
           </div>
         </div>
 
@@ -84,7 +92,6 @@ export function Sidebar({ user, profileRole }) {
           <User className="h-5 w-5 text-muted-foreground" />
           <span className="text-sm">Mother's Name: {user.motherName}</span>
         </div>
-
       </div>
       <div className="flex justify-between">
         {profileRole === "ADMIN" && <button
@@ -102,6 +109,7 @@ export function Sidebar({ user, profileRole }) {
           Logout
         </button>
       </div>
+
     </div>
   );
 }
