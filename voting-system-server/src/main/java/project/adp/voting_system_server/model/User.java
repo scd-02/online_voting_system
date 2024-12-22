@@ -57,7 +57,7 @@ public class User {
     // private String aadhaarStatus; // Active, Inactive, etc.
 
     @ElementCollection
-    @CollectionTable(name = "election_allowed_list", joinColumns = @JoinColumn(name = "election_id"))
+    @CollectionTable(name = "election_allowed_list", joinColumns = @JoinColumn(name = "aadhaar_number"))
     @Column(name = "elections_allowed")
     private List<String> electionList;
 
