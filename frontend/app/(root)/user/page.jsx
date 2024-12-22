@@ -106,7 +106,10 @@ const UserDetailPage = () => {
 
   return (
     <div className="flex min-h-full w-full bg-background">
-      <Sidebar user={userData} />
+      <Sidebar
+        user={userData}
+        profileRole={profileData.role}
+      />
       <ElectionTileView
         eligibleElections={eligibleElections}
         voterId={aadhaar}

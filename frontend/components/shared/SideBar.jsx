@@ -8,7 +8,7 @@ import axios from "axios";
 // Set axios to send cookies with requests
 axios.defaults.withCredentials = true;
 
-export function Sidebar({ user }) {
+export function Sidebar({ user, profileRole }) {
 
   const handleLogout = async () => {
     if (!confirm("Are you sure you want to log out?")) {
@@ -86,12 +86,22 @@ export function Sidebar({ user }) {
         </div>
 
       </div>
-      <button
-        onClick={handleLogout}
-        className="mt-6 mx-auto block bg-red-500 px-4 py-2 text-sm font-medium text-white rounded-lg shadow hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300 transition"
-      >
-        Logout
-      </button>
+      <div className="flex justify-between">
+        {profileRole === "ADMIN" && <button
+          onClick={() => {
+            window.location.href = "user/admin";
+          }}
+          className="mt-6 mx-auto block bg-blue-500 px-4 py-2 text-sm font-medium text-white rounded-lg shadow hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300 transition"
+        >
+          Admin Dashboard
+        </button>}
+        <button
+          onClick={handleLogout}
+          className="mt-6 mx-auto block bg-red-500 px-4 py-2 text-sm font-medium text-white rounded-lg shadow hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300 transition"
+        >
+          Logout
+        </button>
+      </div>
     </div>
   );
 }
