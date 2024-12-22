@@ -32,6 +32,14 @@ export default function Login() {
     }
   };
 
+  const handleAadhaarChange = (e) => {
+    const value = e.target.value;
+    // Restrict input to 12 characters max and only allow numbers
+    if (value.length <= 12 && /^\d*$/.test(value)) {
+      setAadhaar(value);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center bg-gray-100">
       <div className="w-full max-w-sm p-8 bg-white rounded shadow-md border border-gray-300">
@@ -44,9 +52,11 @@ export default function Login() {
             <input
               id="aadhaar"
               type="text"
-              className="w-full px-4 py-2 border rounded-lg"
-              value={aadhaar || ""} // Ensure default value is set
-              onChange={(e) => setAadhaar(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded"
+              value={aadhaar}
+              onChange={handleAadhaarChange}
+              placeholder="Enter Aadhaar Number"
+              maxLength={12} // Ensures that the input is limited to 12 characters
               required
             />
           </div>
