@@ -7,7 +7,6 @@ import CandidateForm from "@/components/shared/CandidateForm";
 import PartyForm from "@/components/shared/PartyForm";
 import ElectionForm from "@/components/shared/ElectionForm";
 import AdminForm from "@/components/shared/AdminForm";
-import { ChevronLeft } from "lucide-react";
 
 axios.defaults.withCredentials = true;
 
@@ -340,23 +339,12 @@ const AdminPage = () => {
         <div className="flex flex-col min-h-screen w-full bg-gray-100 p-8">
             <div className="py-3 flex justify-between items-center">
                 <h1 className="text-2xl font-bold">ADMIN</h1>
-                <div className="flex justify-center items-center space-x-10">
-                    <div
-                        className="text-gray-400 hover:cursor-pointer flex"
-                        onClick={() => window.location.href = "/user"}
-                    >
-                        <ChevronLeft />
-                        <p>
-                            User Dashboard
-                        </p>
-                    </div>
-                    <button
-                        onClick={() => handleEditAdmin()}
-                        className="px-4 py-2 bg-blue-500 text-white rounded"
-                    >
-                        Edit Admin
-                    </button>
-                </div>
+                <button
+                    onClick={() => handleEditAdmin()}
+                    className="px-4 py-2 bg-blue-500 text-white rounded"
+                >
+                    Edit Admin
+                </button>
             </div>
             <div className="flex flex-grow space-x-8 ">
                 {renderColumn(candidates, candidateFilter, setCandidateFilter, "candidates")}
