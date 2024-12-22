@@ -29,7 +29,7 @@ public class SecurityConfig {
         return http
                 // Enable CORS with the specified configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                
+
                 // Disable CSRF as it's not needed for APIs that are stateless or use tokens
                 .csrf(csrf -> csrf.disable())
 
@@ -42,20 +42,21 @@ public class SecurityConfig {
                         .requestMatchers("/otp/**").permitAll()
 
                         // Authenticated endpoints
-                        .requestMatchers("/register/**", "/users/**", "/auth/**", "/election/getElectionsByIds").authenticated()
+                        .requestMatchers("/register/**", "/users/**", "/auth/**", "/election/getElectionsByIds")
+                        .authenticated()
 
                         // Role-based access
-                        .requestMatchers("/admin/**", "/election/**", "/candidate/**", "/party/**").hasAuthority("ADMIN")
+                        .requestMatchers("/admin/**", "/election/**", "/candidate/**", "/party/**",
+                                "/swagger-ui/**")
+                        .hasAuthority("ADMIN")
 
                         // Any other request requires authentication
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
 
                 // Configure form login
                 .formLogin(form -> form
-                        .loginPage("http://localhost:3000/login") // Redirect to frontend login page
-                        .permitAll()
-                )
+                        .loginPage("http://localhost:3000/") // Redirect to frontend login page
+                        .permitAll())
 
                 // Configure logout behavior
                 .logout(logout -> logout
@@ -71,13 +72,11 @@ public class SecurityConfig {
                 // Configure session management
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .maximumSessions(1)
-                )
+                        .maximumSessions(1))
 
                 // Exception handling
                 .exceptionHandling(ex -> ex
-                        .accessDeniedHandler(accessDeniedHandler())
-                )
+                        .accessDeniedHandler(accessDeniedHandler()))
 
                 .build();
     }
@@ -102,23 +101,23 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
+
         // Specify the allowed origin
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        
+
         // Specify allowed HTTP methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        
+
         // Specify allowed headers
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        
+
         // Allow credentials (cookies, authorization headers)
         configuration.setAllowCredentials(true);
-        
+
         // Apply CORS configuration to all paths
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-        
+
         return source;
     }
 
