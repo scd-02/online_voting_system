@@ -214,7 +214,7 @@ const AdminPage = () => {
         const validItems = filteredItems.filter(item => typeof item === 'object' && item !== null);
 
         return (
-            <div className="h-screen w-1/3 flex flex-col">
+            <div className="h-[80vh] w-1/3 flex flex-col">
                 <h2 className="text-xl font-bold mb-4 capitalize">{type}</h2>
                 <input
                     type="text"
