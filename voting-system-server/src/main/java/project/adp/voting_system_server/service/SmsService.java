@@ -37,7 +37,7 @@ public class SmsService {
         otpService.saveOtp(aadhaarNumber, otp);
 
         // Send OTP via Twilio
-        // sendOtpViaTwilio(phoneNumber, otp);
+        sendOtpViaTwilio(phoneNumber, otp);
 
         return otp; // Return the OTP (you might not want to return it in production)
     }
